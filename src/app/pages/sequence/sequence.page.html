@@ -1,0 +1,98 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/tab3" text="Atrás"></ion-back-button>
+    </ion-buttons>
+    <ion-title class="rd-brand">RDPlay</ion-title>
+    <ion-buttons slot="end">
+      <ion-avatar class="rd-avatar"><div class="rd-flag"></div></ion-avatar>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="rd-page seq">
+  <div class="ion-padding">
+    <ion-badge color="warning" class="pill">¡Dale el orden!</ion-badge>
+    <h1>Secuencia del café dominicano</h1>
+    <p class="sub">
+      Organiza los pasos para preparar el mejor café del Caribe, desde la mata hasta la taza.
+    </p>
+
+    <div class="bank">
+      <button
+        type="button"
+        class="bank-card"
+        *ngFor="let s of bank"
+        [hidden]="!isInBank(s.id)"
+        [class.picked]="selectedId === s.id"
+        draggable="true"
+        (dragstart)="onDragStartEvent($event, s.id)"
+        (dragend)="onDragEnd()"
+        (click)="pickFromBank(s.id)"
+      >
+        <span class="info" aria-hidden="true">i</span>
+        <div class="ico" [attr.data-kind]="s.id"></div>
+        <p>{{ s.title }}</p>
+      </button>
+    </div>
+
+    <div class="drop-panel">
+      <div class="drop-head">
+        <span>Coloca en orden:</span>
+        <ion-badge [color]="placedCount === 4 ? 'success' : 'medium'">
+          {{ placedCount }}/4 LISTO
+        </ion-badge>
+      </div>
+
+      <div class="chain">
+        <ng-container *ngFor="let slot of slots; let i = index">
+          <button
+            type="button"
+            class="slot"
+            (click)="tapSlot(i)"
+            (dragover)="onDragOver($event)"
+            (drop)="onDrop(i, $event)"
+            [class.filled]="!!slot"
+          >
+            <span class="num">{{ i + 1 }}</span>
+            <span class="hint" *ngIf="!slot">Suelta aquí</span>
+            <span class="val" *ngIf="slot">{{ labelFor(slot) }}</span>
+          </button>
+          <div class="arrow" *ngIf="i < slots.length - 1" aria-hidden="true">⌄</div>
+        </ng-container>
+      </div>
+
+      <ion-button
+        expand="block"
+        color="secondary"
+        class="verify"
+        [disabled]="placedCount !== 4"
+        (click)="verify()"
+      >
+        <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
+        Verificar orden
+      </ion-button>
+
+      <ion-text color="success" *ngIf="verifyState === 'ok'">
+        <p class="feedback">¡Correcto! +{{ bonusPoints }} puntos guardados localmente.</p>
+      </ion-text>
+      <ion-text color="danger" *ngIf="verifyState === 'bad'">
+        <p class="feedback">Aún no está en orden. Ajusta y vuelve a intentar.</p>
+      </ion-text>
+    </div>
+
+    <ion-card class="hist">
+      <h3>Un toque de historia</h3>
+      <p>
+        El café llegó a la isla en 1735 y el tostado artesanal sigue siendo parte del sabor criollo.
+      </p>
+      <div class="hist-foot"><ion-icon name="information-circle-outline"></ion-icon> SABÍAS QUE…</div>
+    </ion-card>
+
+    <ion-card class="reward">
+      <div class="rw-icon"><ion-icon name="trophy"></ion-icon></div>
+      <h2>+150 puntos</h2>
+      <p>Completa este reto sin errores para ganar el logro “Barista del Cibao”.</p>
+    </ion-card>
+  </div>
+</ion-content>

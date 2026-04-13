@@ -1,0 +1,63 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/tab1" text="Atrás"></ion-back-button>
+    </ion-buttons>
+    <ion-title class="rd-brand">RDPlay</ion-title>
+    <ion-buttons slot="end">
+      <ion-avatar class="rd-avatar"><div class="rd-flag"></div></ion-avatar>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="rd-page quiz">
+  <div class="ion-padding">
+    <p class="eyebrow">¿Sabes o no sabes?</p>
+    <div class="head-row">
+      <h1>Cultura general</h1>
+      <div class="timer" [class.warn]="secondsLeft <= 5">
+        <span>{{ secondsLeft }}</span>
+      </div>
+    </div>
+    <ion-progress-bar color="secondary" [value]="progress"></ion-progress-bar>
+    <div class="meta-row">
+      <span>Pregunta {{ index + 1 }} de {{ questions.length }}</span>
+      <span class="score"
+        ><ion-icon name="ribbon-outline" aria-hidden="true"></ion-icon> {{ score }} pts</span
+      >
+    </div>
+
+    <ion-card class="q-card">
+      <div class="q-icon" aria-hidden="true">
+        <ion-icon name="help"></ion-icon>
+      </div>
+      <h2>{{ current.prompt }}</h2>
+      <div class="deco" aria-hidden="true">♪</div>
+    </ion-card>
+
+    <div class="opts">
+      <button
+        type="button"
+        class="opt"
+        *ngFor="let opt of current.options; let i = index"
+        [class.selected]="selected === i && revealed && i === current.correctIndex"
+        [class.wrong]="selected === i && revealed && i !== current.correctIndex"
+        [class.correct]="revealed && i === current.correctIndex"
+        (click)="onPick(i)"
+      >
+        <span class="badge">{{ ['A', 'B', 'C', 'D'][i] }}</span>
+        <span class="txt">{{ opt }}</span>
+        <ion-icon
+          *ngIf="revealed && i === current.correctIndex"
+          name="checkmark-circle"
+          color="success"
+        ></ion-icon>
+      </button>
+    </div>
+
+    <div class="fact" *ngIf="revealed">
+      <ion-icon name="bulb-outline" aria-hidden="true"></ion-icon>
+      <p>¡Oye! {{ current.fact }}</p>
+    </div>
+  </div>
+</ion-content>

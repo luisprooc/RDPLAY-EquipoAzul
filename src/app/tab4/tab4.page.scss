@@ -1,0 +1,38 @@
+.rd-avatar {
+  width: 36px;
+  height: 36px;
+}
+
+.rd-flag {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(#002d62 0 120deg, #ce1126 120deg 240deg, #fff 240deg 360deg);
+}
+
+.profile {
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+}
+
+.hero {
+  border-radius: 18px;
+  text-align: center;
+}
+
+.big-points {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--rd-red);
+}
+
+.input-wrap {
+  --background: #f6f7f9;
+  border-radius: 12px;
+  padding: 4px 8px;
+}
+
+.hint {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 8px;
+}

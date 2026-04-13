@@ -1,0 +1,32 @@
+<ion-app>
+  <ion-menu contentId="main-content" menuId="main-menu" side="start">
+    <ion-header>
+      <ion-toolbar color="primary">
+        <ion-title>RDPlay</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <ion-list lines="none">
+        <ion-menu-toggle auto-hide="true">
+          <ion-item button detail="false" routerLink="/tabs/tab1" routerDirection="root">
+            <ion-icon slot="start" name="home-outline" aria-hidden="true"></ion-icon>
+            <ion-label>Inicio</ion-label>
+          </ion-item>
+          <ion-item button detail="false" routerLink="/tabs/tab2" routerDirection="root">
+            <ion-icon slot="start" name="bluetooth-outline" aria-hidden="true"></ion-icon>
+            <ion-label>Lobby</ion-label>
+          </ion-item>
+          <ion-item button detail="false" routerLink="/tabs/tab3" routerDirection="root">
+            <ion-icon slot="start" name="trophy-outline" aria-hidden="true"></ion-icon>
+            <ion-label>Retos</ion-label>
+          </ion-item>
+          <ion-item button detail="false" routerLink="/tabs/tab4" routerDirection="root">
+            <ion-icon slot="start" name="person-outline" aria-hidden="true"></ion-icon>
+            <ion-label>Perfil</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+      </ion-list>
+    </ion-content>
+  </ion-menu>
+  <ion-router-outlet id="main-content"></ion-router-outlet>
+</ion-app>
