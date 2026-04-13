@@ -1,0 +1,42 @@
+// Ionic base + RDPlay
+// https://ionicframework.com/docs/theming/basics
+
+:root {
+  --ion-color-primary: #1a3a6e;
+  --ion-color-primary-rgb: 26, 58, 110;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #17335f;
+  --ion-color-primary-tint: #2e4a7c;
+
+  --ion-color-secondary: #c40018;
+  --ion-color-secondary-rgb: 196, 0, 24;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #a80015;
+  --ion-color-secondary-tint: #ca3348;
+
+  --ion-color-tertiary: #f5c542;
+  --ion-color-tertiary-rgb: 245, 197, 66;
+  --ion-color-tertiary-contrast: #1a1a1a;
+  --ion-color-tertiary-contrast-rgb: 26, 26, 26;
+  --ion-color-tertiary-shade: #d8ad39;
+  --ion-color-tertiary-tint: #f6cb55;
+
+  --rd-red: #c40018;
+  --rd-navy: #1a3a6e;
+  --rd-blue-soft: #e8eef7;
+  --rd-yellow: #f5c542;
+  --rd-bg: #f2f3f5;
+}
+
+ion-toolbar {
+  --background: #ffffff;
+  --border-width: 0;
+}
+
+ion-title.rd-brand {
+  color: var(--rd-red);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}

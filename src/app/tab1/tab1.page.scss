@@ -1,0 +1,182 @@
+.rd-home {
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+
+.rd-hero h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #111;
+  margin: 0 0 8px;
+}
+
+.rd-accent {
+  color: var(--rd-red);
+}
+
+.rd-hero p {
+  color: #555;
+  margin: 0 0 20px;
+  line-height: 1.45;
+}
+
+.rd-avatar {
+  width: 36px;
+  height: 36px;
+  border: 2px solid #eee;
+}
+
+.rd-flag {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(#002d62 0 120deg, #ce1126 120deg 240deg, #fff 240deg 360deg);
+}
+
+.rd-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  margin-bottom: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.rd-card-quiz ion-card-content p {
+  min-height: 44px;
+}
+
+.rd-card-bt {
+  --background: var(--rd-blue-soft);
+}
+
+.rd-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px 0;
+}
+
+.rd-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.rd-icon-red {
+  background: var(--rd-red);
+}
+
+.rd-icon-navy {
+  background: var(--rd-navy);
+}
+
+.rd-icon-soft {
+  background: #e6e8eb;
+  color: var(--rd-navy);
+}
+
+.rd-social {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rd-watermark {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  font-size: 120px;
+  font-weight: 800;
+  color: rgba(0, 0, 0, 0.04);
+  pointer-events: none;
+}
+
+.rd-btn-play {
+  --border-radius: 14px;
+  font-weight: 700;
+}
+
+.rd-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.rd-puzzle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--rd-yellow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: var(--rd-navy);
+}
+
+.rd-sub {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 4px 0 0;
+}
+
+.rd-preview-row {
+  display: flex;
+  gap: 8px;
+}
+
+.rd-preview-row span {
+  flex: 1;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  background: #eceff3;
+}
+
+.rd-badge-outline {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.rd-achievements {
+  --background: #eceff3;
+}
+
+.rd-ach-top {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.rd-mini-icons {
+  display: flex;
+  gap: 4px;
+}
+
+.rd-mini-icons span {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #caa05a, #f5c542);
+}
+
+.rd-ach-title {
+  margin: 0;
+  font-weight: 700;
+  color: #222;
+}
+
+.rd-ach-sub {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.rd-points-hint {
+  text-align: center;
+  color: #777;
+  font-size: 0.85rem;
+}

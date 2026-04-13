@@ -1,0 +1,85 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button menu="main-menu"></ion-menu-button>
+    </ion-buttons>
+    <ion-title class="rd-brand">RDPlay</ion-title>
+    <ion-buttons slot="end">
+      <ion-avatar class="rd-avatar"><div class="rd-flag"></div></ion-avatar>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="rd-page">
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="lobby ion-padding">
+    <div class="scan-wrap">
+      <div class="pulse" [class.active]="scanning"></div>
+      <div class="scan-core">
+        <ion-icon name="bluetooth" aria-hidden="true"></ion-icon>
+      </div>
+      <div class="scan-badge"><ion-icon name="trophy" aria-hidden="true"></ion-icon></div>
+    </div>
+    <h2>Buscando Coro</h2>
+    <p class="sub">
+      Escaneando jugadores de RDPlay a tu alrededor para armar la chercha…
+    </p>
+
+    <ion-card class="lobby-card">
+      <div class="row">
+        <div class="bubble blue"><ion-icon name="add" aria-hidden="true"></ion-icon></div>
+        <div>
+          <h3>Crear Sala</h3>
+          <p>Sé el anfitrión y elige el juego: ¿Dominó o Trivia?</p>
+        </div>
+      </div>
+      <ion-button expand="block" color="secondary">Empezar partida</ion-button>
+    </ion-card>
+
+    <ion-card class="lobby-card">
+      <div class="row">
+        <div class="bubble yellow"><ion-icon name="people" aria-hidden="true"></ion-icon></div>
+        <div>
+          <h3>Unirse</h3>
+          <p>Entra a una sala activa y demuestra quién es el tiguere.</p>
+        </div>
+      </div>
+      <ion-button expand="block" color="primary">Buscar sala</ion-button>
+    </ion-card>
+
+    <div class="nearby-head">
+      <h3>Jugadores cercanos</h3>
+      <span class="live">• EN VIVO</span>
+    </div>
+
+    <ion-card class="player-card">
+      <ion-item lines="none">
+        <ion-avatar slot="start"><div class="p-av a1"></div></ion-avatar>
+        <ion-label>
+          <h2>El_Sanky_809</h2>
+          <p>Nivel 42 • Cerca de ti</p>
+        </ion-label>
+        <ion-button slot="end" fill="outline" size="small">Invitar</ion-button>
+      </ion-item>
+    </ion-card>
+
+    <ion-card class="player-card">
+      <ion-item lines="none">
+        <ion-avatar slot="start"><div class="p-av a2"></div></ion-avatar>
+        <ion-label>
+          <h2>LaDura_RD</h2>
+          <p>Nivel 28 • En el lobby</p>
+        </ion-label>
+        <ion-button slot="end" fill="outline" size="small">Invitar</ion-button>
+      </ion-item>
+    </ion-card>
+
+    <div class="hint-card">
+      <ion-icon name="person-add-outline" aria-hidden="true"></ion-icon>
+      <p>Dile a tus amigos que activen su Bluetooth para jugar.</p>
+    </div>
+  </div>
+</ion-content>

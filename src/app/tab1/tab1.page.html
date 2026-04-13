@@ -1,0 +1,118 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button menu="main-menu" autoHide="false"></ion-menu-button>
+    </ion-buttons>
+    <ion-title class="rd-brand">RDPlay</ion-title>
+    <ion-buttons slot="end">
+      <ion-avatar class="rd-avatar" aria-hidden="true">
+        <div class="rd-flag"></div>
+      </ion-avatar>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="rd-page">
+  <div class="rd-home ion-padding">
+    <section class="rd-hero">
+      <h1>¿Qué lo que, <span class="rd-accent">Campeón?</span></h1>
+      <p>Elige tu reto y demuestra que eres el verdadero maestro de la cultura dominicana.</p>
+    </section>
+
+    <ion-card class="rd-card rd-card-quiz" routerLink="/quiz">
+      <div class="rd-card-top">
+        <div class="rd-icon rd-icon-red">
+          <ion-icon name="book-outline" aria-hidden="true"></ion-icon>
+        </div>
+        <div class="rd-social">
+          <span class="rd-avatars"></span>
+          <ion-badge color="warning">+12k</ion-badge>
+        </div>
+      </div>
+      <ion-card-header>
+        <ion-card-title>¿Sabes o no sabes?</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p>Pon a prueba tu conocimiento sobre historia, jerga y lugares de Quisqueya.</p>
+        <ion-button expand="block" color="secondary" class="rd-btn-play">
+          Jugar ahora
+          <ion-icon slot="end" name="arrow-forward" aria-hidden="true"></ion-icon>
+        </ion-button>
+      </ion-card-content>
+      <div class="rd-watermark" aria-hidden="true">?</div>
+    </ion-card>
+
+    <ion-card class="rd-card rd-card-bt" routerLink="/tabs/tab2">
+      <div class="rd-card-top">
+        <div class="rd-icon rd-icon-navy">
+          <ion-icon name="bluetooth" aria-hidden="true"></ion-icon>
+        </div>
+        <ion-badge color="success">EN VIVO</ion-badge>
+      </div>
+      <ion-card-header>
+        <ion-card-title>Multijugador BT</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p>Conecta con tus panas vía Bluetooth y compite en tiempo real.</p>
+        <ion-button expand="block" color="primary">
+          <ion-icon slot="start" name="radio-outline" aria-hidden="true"></ion-icon>
+          Buscar jugadores
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="rd-card" routerLink="/memory">
+      <ion-card-header>
+        <div class="rd-row">
+          <div class="rd-puzzle">
+            <ion-icon name="extension-puzzle-outline" aria-hidden="true"></ion-icon>
+          </div>
+          <div>
+            <ion-card-title>Pareja Criolla</ion-card-title>
+            <p class="rd-sub">Entrena tu mente emparejando iconos típicos dominicanos.</p>
+          </div>
+        </div>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="rd-preview-row" aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="rd-card" routerLink="/sequence">
+      <div class="rd-card-top">
+        <div class="rd-icon rd-icon-soft">
+          <ion-icon name="reorder-three-outline" aria-hidden="true"></ion-icon>
+        </div>
+        <ion-badge color="warning" class="rd-badge-outline">★ NUEVO NIVEL</ion-badge>
+      </div>
+      <ion-card-header>
+        <ion-card-title>¡Dale el Orden!</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p>¿Sabes qué va primero? Ordena los pasos de un Sancocho o de un baile de Merengue.</p>
+        <ion-progress-bar color="secondary" value="0.6"></ion-progress-bar>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="rd-card rd-achievements">
+      <ion-card-content>
+        <div class="rd-ach-top">
+          <div class="rd-mini-icons" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+          <div>
+            <p class="rd-ach-title">Logros recientes</p>
+            <p class="rd-ach-sub">
+              Has desbloqueado {{ achievementsUnlocked }} de {{ achievementsTotal }} símbolos patrios.
+            </p>
+          </div>
+          <ion-button size="small" fill="outline">Ver galería</ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <p class="rd-points-hint">Puntos guardados: <strong>{{ totalPoints | number }}</strong></p>
+  </div>
+</ion-content>

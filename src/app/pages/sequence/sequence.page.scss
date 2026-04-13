@@ -1,0 +1,237 @@
+.rd-avatar {
+  width: 36px;
+  height: 36px;
+}
+
+.rd-flag {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(#002d62 0 120deg, #ce1126 120deg 240deg, #fff 240deg 360deg);
+}
+
+.seq .pill {
+  font-weight: 800;
+  padding: 8px 12px;
+  border-radius: 999px;
+}
+
+.seq h1 {
+  margin: 10px 0 8px;
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #111;
+}
+
+.sub {
+  color: #666;
+  line-height: 1.45;
+}
+
+.bank {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 14px 0 16px;
+}
+
+.bank-card {
+  position: relative;
+  border: 0;
+  border-radius: 18px;
+  padding: 16px 12px 12px;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  min-height: 110px;
+}
+
+.bank-card.picked {
+  outline: 3px solid var(--rd-yellow);
+}
+
+.bank-card .info {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #dbe8ff;
+  color: var(--rd-navy);
+  font-weight: 900;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bank-card .ico {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 8px;
+  border-radius: 12px;
+  background: #f2f3f5;
+}
+
+.bank-card .ico[data-kind='grano'] {
+  background: linear-gradient(135deg, #d7f5d0, #9ed89a);
+}
+
+.bank-card .ico[data-kind='tostado'] {
+  background: linear-gradient(135deg, #ffd7d7, #ff8a8a);
+}
+
+.bank-card .ico[data-kind='molido'] {
+  background: repeating-linear-gradient(
+    45deg,
+    #e8d8c8,
+    #e8d8c8 4px,
+    #d7c4b2 4px,
+    #d7c4b2 8px
+  );
+}
+
+.bank-card .ico[data-kind='taza'] {
+  background: linear-gradient(180deg, #dbe8ff, #9fb7ff);
+}
+
+.bank-card p {
+  margin: 0;
+  font-weight: 900;
+  color: #222;
+}
+
+.drop-panel {
+  background: #eceff3;
+  border-radius: 22px;
+  padding: 14px;
+}
+
+.drop-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.chain {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.slot {
+  width: 100%;
+  border-radius: 999px;
+  border: 2px dashed #b8c0cc;
+  background: #f7f8fa;
+  padding: 14px 16px;
+  position: relative;
+  text-align: center;
+  font-weight: 800;
+  color: #555;
+}
+
+.slot.filled {
+  border-style: solid;
+  border-color: #cfd6e0;
+  background: #fff;
+}
+
+.slot .num {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.35;
+  font-weight: 900;
+}
+
+.hint {
+  font-weight: 700;
+  color: #889;
+}
+
+.val {
+  color: #111;
+}
+
+.arrow {
+  color: #b8c0cc;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.verify {
+  --border-radius: 16px;
+  font-weight: 900;
+}
+
+.feedback {
+  margin-top: 10px;
+  font-weight: 700;
+}
+
+.hist {
+  margin-top: 14px;
+  border-radius: 18px;
+  --background: #e8f0ff;
+  padding: 4px 4px 8px;
+}
+
+.hist h3 {
+  margin: 0 0 6px;
+  color: var(--rd-navy);
+  font-size: 1rem;
+}
+
+.hist p {
+  color: #3b4a63;
+  line-height: 1.45;
+}
+
+.hist-foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 900;
+  color: var(--rd-navy);
+  font-size: 0.78rem;
+  margin-top: 8px;
+}
+
+.reward {
+  margin-top: 12px;
+  border-radius: 18px;
+  --background: #fff4a6;
+  text-align: center;
+  padding-bottom: 12px;
+}
+
+.rw-icon {
+  width: 56px;
+  height: 56px;
+  margin: 8px auto 6px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #d48a00;
+}
+
+.reward h2 {
+  margin: 0;
+  color: #1a1a1a;
+  font-weight: 900;
+}
+
+.reward p {
+  color: #4a4a4a;
+  margin: 6px 12px 0;
+  line-height: 1.35;
+}

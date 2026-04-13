@@ -1,0 +1,42 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button menu="main-menu"></ion-menu-button>
+    </ion-buttons>
+    <ion-title class="rd-brand">RDPlay</ion-title>
+    <ion-buttons slot="end">
+      <ion-avatar class="rd-avatar"><div class="rd-flag"></div></ion-avatar>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="rd-page">
+  <div class="profile ion-padding">
+    <ion-card class="hero">
+      <ion-card-header>
+        <ion-card-title>Hola, {{ displayName }}</ion-card-title>
+        <ion-card-subtitle>Tu puntaje total se guarda en el dispositivo (Hito 2).</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="big-points">{{ totalPoints | number }} pts</div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Nombre para saludar</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item lines="none" class="input-wrap">
+          <ion-input
+            label="Nombre"
+            labelPlacement="stacked"
+            [(ngModel)]="displayName"
+            (ionBlur)="saveName(displayName)"
+          ></ion-input>
+        </ion-item>
+        <p class="hint">Se guarda con Capacitor Preferences (@capacitor/preferences).</p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

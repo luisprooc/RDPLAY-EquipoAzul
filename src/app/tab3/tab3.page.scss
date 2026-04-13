@@ -1,0 +1,49 @@
+.rd-avatar {
+  width: 36px;
+  height: 36px;
+}
+
+.rd-flag {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(#002d62 0 120deg, #ce1126 120deg 240deg, #fff 240deg 360deg);
+}
+
+.retos h1 {
+  margin: 0 0 8px;
+  color: var(--rd-navy);
+  font-weight: 900;
+  font-size: 1.6rem;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--rd-red);
+  font-weight: 800;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  margin: 0 0 4px;
+}
+
+.sub {
+  color: #666;
+  margin: 0 0 16px;
+}
+
+.game-tile {
+  border-radius: 16px;
+  margin-bottom: 10px;
+}
+
+.game-tile h2 {
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.game-tile p {
+  color: #666;
+  font-size: 0.88rem;
+}
