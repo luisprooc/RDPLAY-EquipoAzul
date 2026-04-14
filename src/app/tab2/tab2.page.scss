@@ -1,25 +1,29 @@
-.rd-avatar {
-  width: 36px;
-  height: 36px;
-}
-
-.rd-flag {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: conic-gradient(#002d62 0 120deg, #ce1126 120deg 240deg, #fff 240deg 360deg);
-}
-
 .lobby {
   text-align: center;
-  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  padding: 12px 16px calc(28px + env(safe-area-inset-bottom));
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.ble-head {
+  margin-top: 8px;
+}
+
+.ble-hint {
+  font-size: 0.85rem;
+  color: #888;
+  margin: -4px 0 10px;
+  text-align: center;
+  line-height: 1.35;
 }
 
 .scan-wrap {
   position: relative;
-  width: 200px;
-  height: 200px;
-  margin: 12px auto 8px;
+  width: min(200px, 52vw);
+  height: min(200px, 52vw);
+  max-width: 200px;
+  max-height: 200px;
+  margin: 8px auto 4px;
 }
 
 .pulse {
@@ -51,7 +55,7 @@
 
 .scan-core {
   position: absolute;
-  inset: 48px;
+  inset: 22%;
   border-radius: 50%;
   background: var(--rd-red);
   color: #fff;
@@ -78,41 +82,76 @@
   border: 3px solid #fff;
 }
 
-.lobby h2 {
+.lobby-title {
   color: var(--rd-navy);
   font-weight: 800;
-  margin: 8px 0 4px;
+  margin: 10px 0 6px;
+  font-size: clamp(1.25rem, 4.5vw, 1.45rem);
+  line-height: 1.2;
 }
 
 .sub {
-  color: #666;
-  font-size: 0.95rem;
-  line-height: 1.4;
-  margin: 0 0 16px;
+  color: #555;
+  font-size: 0.94rem;
+  line-height: 1.5;
+  margin: 0 auto 18px;
+  max-width: 340px;
+  padding: 0 4px;
+}
+
+.lobby-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 22px;
 }
 
 .lobby-card {
   text-align: left;
-  border-radius: 18px;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
+  border-radius: 20px;
+  margin: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+}
+
+.lobby-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 16px 14px;
 }
 
 .row {
   display: flex;
-  gap: 12px;
+  gap: 14px;
   align-items: flex-start;
-  padding: 12px 12px 4px;
+  padding: 0;
+}
+
+.row-text {
+  flex: 1;
+  min-width: 0;
+  padding-top: 2px;
+}
+
+.lobby-card-btn {
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  min-height: 48px;
+  --padding-top: 14px;
+  --padding-bottom: 14px;
 }
 
 .bubble {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: 24px;
+  flex-shrink: 0;
 }
 
 .bubble.blue {
@@ -127,21 +166,24 @@
 
 .lobby-card h3 {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 1.08rem;
   font-weight: 800;
+  color: #1a1a1a;
 }
 
 .lobby-card p {
-  margin: 4px 0 0;
+  margin: 6px 0 0;
   color: #666;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
+  line-height: 1.45;
 }
 
 .nearby-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 16px 0 8px;
+  gap: 10px;
+  margin: 20px 0 10px;
   text-align: left;
 }
 
@@ -154,7 +196,14 @@
 .live {
   color: var(--rd-red);
   font-weight: 800;
+  font-size: 0.82rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ble-device-card ion-label p {
   font-size: 0.85rem;
+  color: #777;
 }
 
 .player-card {
@@ -202,4 +251,10 @@
 .room-card {
   border-radius: 16px;
   margin-bottom: 8px;
+}
+
+.room-status-hint {
+  font-size: 0.82rem;
+  color: var(--ion-color-primary-shade, #3a5bc7);
+  margin-top: 4px;
 }

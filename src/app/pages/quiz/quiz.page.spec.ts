@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { QuizPage } from './quiz.page';
 import { StorageService } from '../../core/storage.service';
+import { LobbyService } from '../../core/lobby.service';
 
 describe('QuizPage', () => {
   let component: QuizPage;
@@ -21,7 +22,13 @@ describe('QuizPage', () => {
             },
           },
         },
-        { provide: Router, useValue: { navigate: jasmine.createSpy('navigate') } },
+        {
+          provide: Router,
+          useValue: {
+            navigate: jasmine.createSpy('navigate'),
+            navigateByUrl: jasmine.createSpy('navigateByUrl'),
+          },
+        },
         {
           provide: StorageService,
           useValue: {
@@ -31,6 +38,7 @@ describe('QuizPage', () => {
             getJson: () => Promise.resolve(null),
           },
         },
+        { provide: LobbyService, useValue: { reportPlayerFinishedRound: () => Promise.resolve() } },
       ],
     });
     fixture = TestBed.createComponent(QuizPage);

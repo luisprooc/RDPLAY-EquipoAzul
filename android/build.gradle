@@ -24,6 +24,25 @@ allprojects {
     }
 }
 
+// Capacitor y plugins declaran Java/Kotlin 21; muchos entornos Android usan JDK 17.
+// Unificamos a 17 para evitar "invalid source release: 21" al compilar.
+subprojects { subproject ->
+    subproject.afterEvaluate {
+        def androidExt = subproject.extensions.findByName('android')
+        if (androidExt != null) {
+            androidExt.compileOptions {
+                sourceCompatibility JavaVersion.VERSION_17
+                targetCompatibility JavaVersion.VERSION_17
+            }
+        }
+        subproject.tasks.configureEach { task ->
+            if (task.name.contains('Kotlin') && task.name.startsWith('compile') && task.hasProperty('kotlinOptions')) {
+                task.kotlinOptions.jvmTarget = '17'
+            }
+        }
+    }
+}
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }

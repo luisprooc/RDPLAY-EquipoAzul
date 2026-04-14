@@ -2,6 +2,7 @@ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { AppComponent } from './app.component';
+import { UserProfileService } from './core/user-profile.service';
 
 describe('AppComponent', () => {
 
@@ -9,6 +10,9 @@ describe('AppComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [AppComponent],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      providers: [
+        { provide: UserProfileService, useValue: { refreshFromStorage: () => Promise.resolve() } },
+      ],
     }).compileComponents();
   });
 

@@ -1,4 +1,4 @@
-/** Claves para @capacitor/preferences (Hito 2 — almacenamiento local). */
+/** Claves para almacenamiento local en el dispositivo (Capacitor Preferences). */
 export const STORAGE_KEYS = {
   TOTAL_POINTS: 'rdplay_total_points',
   DISPLAY_NAME: 'rdplay_display_name',

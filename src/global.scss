@@ -34,3 +34,18 @@ html {
 ion-content.rd-page {
   --background: var(--rd-bg);
 }
+
+/* Bandera RD en barras de herramientas (mismo aspecto en todas las pantallas) */
+ion-avatar.rd-avatar,
+.rd-avatar {
+  width: 36px;
+  height: 36px;
+  border: 2px solid rgba(0, 0, 0, 0.08);
+}
+
+.rd-flag {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: url("assets/flag-do.svg") center / cover no-repeat;
+}

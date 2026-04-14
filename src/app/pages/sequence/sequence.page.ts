@@ -1,7 +1,8 @@
 import { Component, OnDestroy } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { StorageService } from '../../core/storage.service';
 import { STORAGE_KEYS } from '../../core/storage.keys';
+import { LobbyService } from '../../core/lobby.service';
 import {
   SEQUENCE_SCENARIOS,
   SequenceScenarioDef,
@@ -37,6 +38,8 @@ export class SequencePage implements OnDestroy {
   constructor(
     private readonly storage: StorageService,
     private readonly router: Router,
+    private readonly route: ActivatedRoute,
+    private readonly lobby: LobbyService,
   ) {
     this.applyScenario(SEQUENCE_SCENARIOS[Math.floor(Math.random() * SEQUENCE_SCENARIOS.length)]);
   }
@@ -82,8 +85,22 @@ export class SequencePage implements OnDestroy {
   private goHomeAfterDelay(): void {
     this.clearHomeTimer();
     this.homeTimer = setTimeout(() => {
-      void this.router.navigateByUrl('/tabs/tab1', { replaceUrl: true });
+      void this.afterRoundFinished();
     }, HOME_DELAY_MS);
+  }
+
+  private async afterRoundFinished(): Promise<void> {
+    const roomId = this.route.snapshot.queryParamMap.get('room');
+    if (roomId) {
+      try {
+        await this.lobby.reportPlayerFinishedRound(roomId);
+      } catch {
+        /* ignore */
+      }
+      await this.router.navigate(['/bt-room', roomId], { replaceUrl: true });
+      return;
+    }
+    await this.router.navigateByUrl('/tabs/tab1', { replaceUrl: true });
   }
 
   private async hydrate(): Promise<void> {
