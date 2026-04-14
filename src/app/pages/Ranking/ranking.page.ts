@@ -6,6 +6,7 @@ import { StorageService } from '../../core/storage.service';
   selector: 'app-ranking',
   templateUrl: './ranking.page.html',
   styleUrls: ['./ranking.page.scss'],
+  standalone: false,
 })
 export class RankingPage implements OnInit {
   scores: RankingEntry[] = [];
