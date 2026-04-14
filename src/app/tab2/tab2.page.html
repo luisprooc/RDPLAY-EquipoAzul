@@ -36,7 +36,7 @@
           <p>Sé el anfitrión y elige el juego: ¿Dominó o Trivia?</p>
         </div>
       </div>
-      <ion-button expand="block" color="secondary">Empezar partida</ion-button>
+      <ion-button expand="block" color="secondary" (click)="openCreateRoom()">Empezar partida</ion-button>
     </ion-card>
 
     <ion-card class="lobby-card">
@@ -47,39 +47,74 @@
           <p>Entra a una sala activa y demuestra quién es el tiguere.</p>
         </div>
       </div>
-      <ion-button expand="block" color="primary">Buscar sala</ion-button>
+      <ion-button expand="block" color="primary">
+        Buscar sala
+        <ion-badge *ngIf="rooms.length > 0" slot="end" color="danger">{{ rooms.length }}</ion-badge>
+      </ion-button>
     </ion-card>
 
+    <!-- Jugadores cercanos -->
     <div class="nearby-head">
       <h3>Jugadores cercanos</h3>
       <span class="live">• EN VIVO</span>
     </div>
 
-    <ion-card class="player-card">
-      <ion-item lines="none">
-        <ion-avatar slot="start"><div class="p-av a1"></div></ion-avatar>
-        <ion-label>
-          <h2>El_Sanky_809</h2>
-          <p>Nivel 42 • Cerca de ti</p>
-        </ion-label>
-        <ion-button slot="end" fill="outline" size="small">Invitar</ion-button>
-      </ion-item>
-    </ion-card>
+    <ng-container *ngIf="scanning">
+      <ion-card class="player-card" *ngFor="let i of [0, 1]">
+        <ion-item lines="none">
+          <ion-avatar slot="start">
+            <ion-skeleton-text [animated]="true"></ion-skeleton-text>
+          </ion-avatar>
+          <ion-label>
+            <ion-skeleton-text [animated]="true" style="width: 55%"></ion-skeleton-text>
+            <ion-skeleton-text [animated]="true" style="width: 35%"></ion-skeleton-text>
+          </ion-label>
+        </ion-item>
+      </ion-card>
+    </ng-container>
 
-    <ion-card class="player-card">
-      <ion-item lines="none">
-        <ion-avatar slot="start"><div class="p-av a2"></div></ion-avatar>
-        <ion-label>
-          <h2>LaDura_RD</h2>
-          <p>Nivel 28 • En el lobby</p>
-        </ion-label>
-        <ion-button slot="end" fill="outline" size="small">Invitar</ion-button>
-      </ion-item>
-    </ion-card>
+    <!-- Lista de jugadores -->
+    <ng-container *ngIf="!scanning">
+      <ion-card class="player-card" *ngFor="let p of players">
+        <ion-item lines="none">
+          <ion-avatar slot="start">
+            <div class="p-av" [style.background]="avatarGradient(p.id)"></div>
+          </ion-avatar>
+          <ion-label>
+            <h2>{{ p.name }}</h2>
+            <p>Nivel {{ p.level }} • Cerca de ti</p>
+          </ion-label>
+          <ion-button slot="end" fill="outline" size="small" (click)="invitePlayer(p)">Invitar</ion-button>
+        </ion-item>
+      </ion-card>
 
-    <div class="hint-card">
-      <ion-icon name="person-add-outline" aria-hidden="true"></ion-icon>
-      <p>Dile a tus amigos que activen su Bluetooth para jugar.</p>
-    </div>
+      <div class="hint-card" *ngIf="players.length === 0">
+        <ion-icon name="person-add-outline" aria-hidden="true"></ion-icon>
+        <p>Dile a tus amigos que abran RDPlay para jugar.</p>
+      </div>
+    </ng-container>
+
+    <!-- Salas activas -->
+    <ng-container *ngIf="rooms.length > 0">
+      <div class="nearby-head">
+        <h3>Salas activas</h3>
+        <span class="live">• {{ rooms.length }}</span>
+      </div>
+
+      <ion-card class="room-card" *ngFor="let r of rooms">
+        <ion-item lines="none">
+          <div class="bubble blue" slot="start" style="flex-shrink:0">
+            <ion-icon [name]="gameIcon(r.game)" aria-hidden="true"></ion-icon>
+          </div>
+          <ion-label>
+            <h2>{{ r.hostName }}</h2>
+            <p>{{ gameLabel(r.game) }} • {{ r.playerCount }}/{{ r.maxPlayers }} jugadores</p>
+          </ion-label>
+          <ion-button slot="end" fill="solid" color="primary" size="small" (click)="joinRoom(r)">
+            Unirse
+          </ion-button>
+        </ion-item>
+      </ion-card>
+    </ng-container>
   </div>
 </ion-content>
