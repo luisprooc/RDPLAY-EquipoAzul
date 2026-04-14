@@ -62,20 +62,22 @@
     </ion-card>
 
     <ion-card class="rd-card" routerLink="/memory">
-      <ion-card-header>
-        <div class="rd-row">
-          <div class="rd-puzzle">
-            <ion-icon name="extension-puzzle-outline" aria-hidden="true"></ion-icon>
-          </div>
-          <div>
-            <ion-card-title>Pareja Criolla</ion-card-title>
-            <p class="rd-sub">Entrena tu mente emparejando iconos típicos dominicanos.</p>
-          </div>
+      <div class="rd-card-top">
+        <div class="rd-icon rd-icon-yellow">
+          <ion-icon name="extension-puzzle-outline" aria-hidden="true"></ion-icon>
         </div>
+        <ion-badge color="primary">MEMORIA</ion-badge>
+      </div>
+      <ion-card-header>
+        <ion-card-title>Pareja Criolla</ion-card-title>
       </ion-card-header>
       <ion-card-content>
+        <p>Entrena tu mente emparejando iconos típicos dominicanos.</p>
         <div class="rd-preview-row" aria-hidden="true">
-          <span></span><span></span><span></span><span></span>
+          <span class="rd-preview-cell"><ion-icon name="help"></ion-icon></span>
+          <span class="rd-preview-cell"><ion-icon name="help"></ion-icon></span>
+          <span class="rd-preview-cell"><ion-icon name="help"></ion-icon></span>
+          <span class="rd-preview-cell"><ion-icon name="help"></ion-icon></span>
         </div>
       </ion-card-content>
     </ion-card>
@@ -92,23 +94,27 @@
       </ion-card-header>
       <ion-card-content>
         <p>¿Sabes qué va primero? Ordena los pasos de un Sancocho o de un baile de Merengue.</p>
-        <ion-progress-bar color="secondary" value="0.6"></ion-progress-bar>
+        <ion-progress-bar class="rd-seq-progress" color="secondary" value="0.6"></ion-progress-bar>
       </ion-card-content>
     </ion-card>
 
     <ion-card class="rd-card rd-achievements">
       <ion-card-content>
-        <div class="rd-ach-top">
-          <div class="rd-mini-icons" aria-hidden="true">
-            <span></span><span></span><span></span>
+        <div class="rd-achievements-layout">
+          <div class="rd-ach-head">
+            <div class="rd-mini-icons" aria-hidden="true">
+              <span></span><span></span><span></span>
+            </div>
+            <div class="rd-ach-copy">
+              <p class="rd-ach-title">Logros recientes</p>
+              <p class="rd-ach-sub">
+                Has desbloqueado {{ achievementsUnlocked }} de {{ achievementsTotal }} símbolos patrios.
+              </p>
+            </div>
           </div>
-          <div>
-            <p class="rd-ach-title">Logros recientes</p>
-            <p class="rd-ach-sub">
-              Has desbloqueado {{ achievementsUnlocked }} de {{ achievementsTotal }} símbolos patrios.
-            </p>
-          </div>
-          <ion-button size="small" fill="outline">Ver galería</ion-button>
+          <ion-button class="rd-ach-btn" expand="block" size="small" fill="outline" color="primary">
+            Ver galería
+          </ion-button>
         </div>
       </ion-card-content>
     </ion-card>

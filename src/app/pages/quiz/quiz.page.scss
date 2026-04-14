@@ -46,6 +46,49 @@
 .timer.warn {
   border-color: #b00020;
   color: #b00020;
+  animation: timer-pulse 1s ease-in-out infinite;
+}
+
+.timer-frozen {
+  border-color: #2dd36f;
+  color: #146b2e;
+  animation: none;
+}
+
+@keyframes timer-pulse {
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+.quiz-done-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  border-radius: 14px;
+  background: #e8f5e9;
+  color: #1b5e20;
+  font-weight: 700;
+  font-size: 0.95rem;
+  animation: rd-fade-in 0.35s ease;
+}
+
+.quiz-done-banner ion-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+@keyframes rd-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .meta-row {
@@ -120,6 +163,18 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   font-size: 1rem;
   color: #333;
+  transition:
+    background 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
+}
+
+.opt:active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+.opt:disabled {
+  cursor: default;
 }
 
 .opt .badge {

@@ -7,6 +7,7 @@ import { IonicModule } from '@ionic/angular';
 
 import { QuizPageRoutingModule } from './quiz-routing.module';
 
+import { QuizDifficultyPage } from './quiz-difficulty.page';
 import { QuizPage } from './quiz.page';
 
 @NgModule({
@@ -17,6 +18,6 @@ import { QuizPage } from './quiz.page';
     IonicModule,
     QuizPageRoutingModule
   ],
-  declarations: [QuizPage]
+  declarations: [QuizDifficultyPage, QuizPage]
 })
 export class QuizPageModule {}

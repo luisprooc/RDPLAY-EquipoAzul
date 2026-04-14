@@ -1,0 +1,52 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/tab1" text="Atrás"></ion-back-button>
+    </ion-buttons>
+    <ion-title class="rd-brand">RDPlay</ion-title>
+    <ion-buttons slot="end">
+      <ion-avatar class="rd-avatar"><div class="rd-flag"></div></ion-avatar>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="rd-page quiz-diff">
+  <div class="ion-padding">
+    <p class="eyebrow">¿Sabes o no sabes?</p>
+    <h1>Elige la dificultad</h1>
+    <p class="sub">Cada partida usa preguntas al azar del banco cultural de RD.</p>
+
+    <ion-card class="diff-card" button="true" (click)="start('easy')">
+      <ion-card-header>
+        <div class="diff-badge easy">Fácil</div>
+        <ion-card-title>Modo tranquilo</ion-card-title>
+        <ion-card-subtitle>3 preguntas · ideal para calentar</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-icon name="leaf-outline" color="success"></ion-icon>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="diff-card" button="true" (click)="start('medium')">
+      <ion-card-header>
+        <div class="diff-badge medium">Medio</div>
+        <ion-card-title>Reto criollo</ion-card-title>
+        <ion-card-subtitle>8 preguntas · equilibrio tiempo y reto</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-icon name="flame-outline" color="warning"></ion-icon>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="diff-card" button="true" (click)="start('hard')">
+      <ion-card-header>
+        <div class="diff-badge hard">Difícil</div>
+        <ion-card-title>Maestro de Quisqueya</ion-card-title>
+        <ion-card-subtitle>12 preguntas · solo para tigueres de cultura</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-icon name="skull-outline" color="danger"></ion-icon>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

@@ -1,12 +1,17 @@
 import { Component, OnDestroy } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { StorageService } from '../../core/storage.service';
 import { STORAGE_KEYS } from '../../core/storage.keys';
+import { QuizQuestion } from './quiz-question.model';
+import { QUIZ_QUESTION_BANK } from './quiz-questions.data';
+import { pickRandomQuestions } from './quiz-utils';
 
-type QuizQuestion = {
-  prompt: string;
-  options: string[];
-  correctIndex: number;
-  fact: string;
+const HOME_DELAY_MS = 2800;
+
+const DIFFICULTY_COUNTS: Record<string, number> = {
+  easy: 3,
+  medium: 8,
+  hard: 12,
 };
 
 @Component({
@@ -16,64 +21,64 @@ type QuizQuestion = {
   standalone: false,
 })
 export class QuizPage implements OnDestroy {
-  readonly questions: QuizQuestion[] = [
-    {
-      prompt: '¿Cuál es el baile nacional de RD?',
-      options: ['Bachata', 'Merengue', 'Salsa', 'Son'],
-      correctIndex: 1,
-      fact: 'El Merengue fue declarado Patrimonio Cultural de la Humanidad por la UNESCO en 2016.',
-    },
-    {
-      prompt: '¿Cuál es la flor nacional?',
-      options: ['Rosa', 'Flor de Bayahibe', 'Caoba', 'Orquídea'],
-      correctIndex: 1,
-      fact: 'La Rosa de Bayahibe es endémica de la región este.',
-    },
-    {
-      prompt: '¿En qué año llegó el café a la isla (aprox.)?',
-      options: ['1492', '1735', '1821', '1844'],
-      correctIndex: 1,
-      fact: 'El café se cultivó en Santo Domingo desde el siglo XVIII.',
-    },
-  ];
+  questions: QuizQuestion[] = [];
 
   index = 0;
   score = 0;
   secondsLeft = 12;
   selected: number | null = null;
   revealed = false;
+  finished = false;
 
   private timer: ReturnType<typeof setInterval> | null = null;
+  private homeTimer: ReturnType<typeof setTimeout> | null = null;
 
-  constructor(private readonly storage: StorageService) {}
+  constructor(
+    private readonly storage: StorageService,
+    private readonly router: Router,
+    private readonly route: ActivatedRoute,
+  ) {}
 
   ionViewWillEnter(): void {
-    void this.hydrate();
+    const d = this.route.snapshot.queryParamMap.get('d');
+    const total = d ? DIFFICULTY_COUNTS[d] : 0;
+    if (!total) {
+      void this.router.navigate(['/quiz'], { replaceUrl: true });
+      return;
+    }
+
+    this.finished = false;
+    this.index = 0;
+    this.score = 0;
+    this.selected = null;
+    this.revealed = false;
+    this.questions = pickRandomQuestions(QUIZ_QUESTION_BANK, total);
+    if (this.questions.length === 0) {
+      void this.router.navigate(['/quiz'], { replaceUrl: true });
+      return;
+    }
     this.startQuestion();
   }
 
   ionViewWillLeave(): void {
     this.clearTimer();
+    this.clearHomeTimer();
   }
 
   ngOnDestroy(): void {
     this.clearTimer();
+    this.clearHomeTimer();
   }
 
   get progress(): number {
+    if (this.questions.length === 0) {
+      return 0;
+    }
     return (this.index + 1) / this.questions.length;
   }
 
   get current(): QuizQuestion {
     return this.questions[this.index];
-  }
-
-  private async hydrate(): Promise<void> {
-    const saved = await this.storage.getJson<{ index: number; score: number }>(STORAGE_KEYS.QUIZ);
-    if (saved) {
-      this.index = Math.min(Math.max(saved.index, 0), this.questions.length - 1);
-      this.score = saved.score;
-    }
   }
 
   private async persistRoundState(): Promise<void> {
@@ -90,11 +95,18 @@ export class QuizPage implements OnDestroy {
   }
 
   private startQuestion(): void {
+    if (this.finished || this.questions.length === 0) {
+      return;
+    }
     this.clearTimer();
     this.secondsLeft = 12;
     this.selected = null;
     this.revealed = false;
     this.timer = setInterval(() => {
+      if (this.finished) {
+        this.clearTimer();
+        return;
+      }
       this.secondsLeft -= 1;
       if (this.secondsLeft <= 0) {
         void this.onPick(null);
@@ -109,8 +121,22 @@ export class QuizPage implements OnDestroy {
     }
   }
 
+  private clearHomeTimer(): void {
+    if (this.homeTimer) {
+      clearTimeout(this.homeTimer);
+      this.homeTimer = null;
+    }
+  }
+
+  private goHomeAfterDelay(): void {
+    this.clearHomeTimer();
+    this.homeTimer = setTimeout(() => {
+      void this.router.navigateByUrl('/tabs/tab1', { replaceUrl: true });
+    }, HOME_DELAY_MS);
+  }
+
   async onPick(optionIndex: number | null): Promise<void> {
-    if (this.revealed) {
+    if (this.revealed || this.finished || this.questions.length === 0) {
       return;
     }
     this.clearTimer();
@@ -128,14 +154,16 @@ export class QuizPage implements OnDestroy {
     await this.addToTotal(earned);
     await this.persistRoundState();
 
-    setTimeout(async () => {
-      if (this.index >= this.questions.length - 1) {
-        await this.storage.setJson(STORAGE_KEYS.QUIZ, { index: 0, score: 0 });
-        this.index = 0;
-        this.score = 0;
-      } else {
-        this.index += 1;
-      }
+    const isLast = this.index >= this.questions.length - 1;
+    if (isLast) {
+      this.finished = true;
+      await this.storage.setJson(STORAGE_KEYS.QUIZ, { index: 0, score: 0 });
+      this.goHomeAfterDelay();
+      return;
+    }
+
+    setTimeout(() => {
+      this.index += 1;
       this.startQuestion();
     }, 1600);
   }

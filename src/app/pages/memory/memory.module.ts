@@ -7,6 +7,7 @@ import { IonicModule } from '@ionic/angular';
 
 import { MemoryPageRoutingModule } from './memory-routing.module';
 
+import { MemoryDifficultyPage } from './memory-difficulty.page';
 import { MemoryPage } from './memory.page';
 
 @NgModule({
@@ -17,6 +18,6 @@ import { MemoryPage } from './memory.page';
     IonicModule,
     MemoryPageRoutingModule
   ],
-  declarations: [MemoryPage]
+  declarations: [MemoryDifficultyPage, MemoryPage]
 })
 export class MemoryPageModule {}

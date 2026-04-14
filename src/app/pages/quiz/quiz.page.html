@@ -1,7 +1,7 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/tabs/tab1" text="Atrás"></ion-back-button>
+      <ion-back-button defaultHref="/quiz" text="Atrás"></ion-back-button>
     </ion-buttons>
     <ion-title class="rd-brand">RDPlay</ion-title>
     <ion-buttons slot="end">
@@ -11,15 +11,15 @@
 </ion-header>
 
 <ion-content class="rd-page quiz">
-  <div class="ion-padding">
+  <div class="ion-padding" *ngIf="questions.length > 0">
     <p class="eyebrow">¿Sabes o no sabes?</p>
     <div class="head-row">
       <h1>Cultura general</h1>
-      <div class="timer" [class.warn]="secondsLeft <= 5">
+      <div class="timer" [class.warn]="secondsLeft <= 5 && !finished" [class.timer-frozen]="finished">
         <span>{{ secondsLeft }}</span>
       </div>
     </div>
-    <ion-progress-bar color="secondary" [value]="progress"></ion-progress-bar>
+    <ion-progress-bar color="secondary" [value]="finished ? 1 : progress"></ion-progress-bar>
     <div class="meta-row">
       <span>Pregunta {{ index + 1 }} de {{ questions.length }}</span>
       <span class="score"
@@ -35,6 +35,11 @@
       <div class="deco" aria-hidden="true">♪</div>
     </ion-card>
 
+    <div class="quiz-done-banner" *ngIf="finished" role="status">
+      <ion-icon name="checkmark-circle" color="success"></ion-icon>
+      <p>¡Partida terminada! Volviendo al inicio…</p>
+    </div>
+
     <div class="opts">
       <button
         type="button"
@@ -43,6 +48,7 @@
         [class.selected]="selected === i && revealed && i === current.correctIndex"
         [class.wrong]="selected === i && revealed && i !== current.correctIndex"
         [class.correct]="revealed && i === current.correctIndex"
+        [disabled]="finished"
         (click)="onPick(i)"
       >
         <span class="badge">{{ ['A', 'B', 'C', 'D'][i] }}</span>
