@@ -10,6 +10,39 @@
   </ion-toolbar>
 </ion-header>
 
+<!-- Waiting room overlay -->
+<div class="mp-overlay" *ngIf="waitingPhase">
+  <div class="mp-box">
+    <ion-icon name="people" class="mp-icon"></ion-icon>
+    <h2>Sala de espera</h2>
+    <p class="mp-sub">Trivia Quiz · {{ roomPlayers.length }}/{{ room?.maxPlayers }} jugadores</p>
+    <div class="mp-players">
+      <div class="mp-player" *ngFor="let p of roomPlayers">
+        <ion-icon name="person-circle-outline"></ion-icon> {{ p.name }}
+      </div>
+    </div>
+    <ion-button *ngIf="isHost" expand="block" color="secondary" (click)="startGame()" [disabled]="roomPlayers.length < 2">
+      Comenzar partida
+    </ion-button>
+    <p *ngIf="!isHost" class="mp-wait">Esperando que el anfitrión inicie…</p>
+    <p *ngIf="isHost && roomPlayers.length < 2" class="mp-wait">Esperando al menos 2 jugadores…</p>
+  </div>
+</div>
+
+<!-- Scoreboard overlay -->
+<div class="mp-overlay" *ngIf="scoreboardVisible">
+  <div class="mp-box">
+    <ion-icon name="trophy" class="mp-icon" color="warning"></ion-icon>
+    <h2>Resultados</h2>
+    <div class="mp-score-row" *ngFor="let p of scoreboard; let i = index">
+      <span class="mp-rank">{{ i + 1 }}.</span>
+      <span class="mp-name">{{ p.name }}</span>
+      <span class="mp-pts">{{ p.score ?? 0 }} pts</span>
+    </div>
+    <ion-button expand="block" color="primary" (click)="backToLobby()">Volver al lobby</ion-button>
+  </div>
+</div>
+
 <ion-content class="rd-page quiz">
   <div class="ion-padding" *ngIf="questions.length > 0">
     <p class="eyebrow">¿Sabes o no sabes?</p>

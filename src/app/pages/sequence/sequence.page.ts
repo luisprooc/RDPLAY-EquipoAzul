@@ -1,4 +1,5 @@
 import { Component, OnDestroy } from '@angular/core';
+<<<<<<< Updated upstream
 import { Router } from '@angular/router';
 import { StorageService } from '../../core/storage.service';
 import { STORAGE_KEYS } from '../../core/storage.keys';
@@ -8,6 +9,13 @@ import {
   SequenceStepDef,
   shuffleSequenceSteps,
 } from './sequence-scenarios.data';
+=======
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { StorageService } from '../../core/storage.service';
+import { STORAGE_KEYS } from '../../core/storage.keys';
+import { LobbyService, LobbyRoom } from '../../core/lobby.service';
+>>>>>>> Stashed changes
 
 const HOME_DELAY_MS = 2800;
 
@@ -18,20 +26,31 @@ const HOME_DELAY_MS = 2800;
   standalone: false,
 })
 export class SequencePage implements OnDestroy {
+<<<<<<< Updated upstream
   scenario: SequenceScenarioDef = SEQUENCE_SCENARIOS[0];
   shuffledBank: SequenceStepDef[] = shuffleSequenceSteps(SEQUENCE_SCENARIOS[0].steps);
 
   slots: (string | null)[] = Array(SEQUENCE_SCENARIOS[0].correctOrder.length).fill(null);
-  placedCount = 0;
+=======
+  readonly bank: Step[] = [
+    { id: 'molido', title: 'Molido', hint: 'Líneas marrones' },
+    { id: 'grano', title: 'Grano', hint: 'En la mata' },
+    { id: 'taza', title: 'Taza', hint: 'Listo para beber' },
+    { id: 'tostado', title: 'Tostado', hint: 'Fuego y aroma' },
+  ];
 
+  readonly correctOrder = ['grano', 'tostado', 'molido', 'taza'];
+
+  slots: (string | null)[] = [null, null, null, null];
+>>>>>>> Stashed changes
+  placedCount = 0;
   draggingId: string | null = null;
   selectedId: string | null = null;
-
   verifyState: 'idle' | 'ok' | 'bad' = 'idle';
-
   bonusPoints = 150;
   completed = false;
 
+<<<<<<< Updated upstream
   private homeTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
@@ -52,6 +71,80 @@ export class SequencePage implements OnDestroy {
     const picked = SEQUENCE_SCENARIOS[Math.floor(Math.random() * SEQUENCE_SCENARIOS.length)];
     this.applyScenario(picked);
     void this.hydrate();
+=======
+  // Multiplayer state
+  roomId: string | null = null;
+  room: LobbyRoom | null = null;
+  isHost = false;
+  waitingPhase = false;
+  scoreboardVisible = false;
+  scoreboard: { name: string; score: number | null }[] = [];
+
+  private roomSub?: Subscription;
+
+  constructor(
+    private readonly storage: StorageService,
+    private readonly lobby: LobbyService,
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+  ) {}
+
+  ionViewWillEnter(): void {
+    this.roomId = this.route.snapshot.queryParamMap.get('roomId');
+    if (this.roomId) {
+      this.waitingPhase = true;
+      this.roomSub = this.lobby.watchRoom(this.roomId).subscribe(room => {
+        this.room = room;
+        this.isHost = room.hostId === this.lobby.currentPlayerId;
+        if (room.status === 'in-progress' && this.waitingPhase) {
+          this.waitingPhase = false;
+          void this.hydrate();
+        }
+        if (room.status === 'finished' || this.allDone(room)) {
+          this.showScoreboard(room);
+        }
+      });
+    } else {
+      void this.hydrate();
+    }
+  }
+
+  ionViewWillLeave(): void {
+    this.roomSub?.unsubscribe();
+    this.roomSub = undefined;
+    this.waitingPhase = false;
+    this.scoreboardVisible = false;
+  }
+
+  ngOnDestroy(): void {
+    this.roomSub?.unsubscribe();
+  }
+
+  get roomPlayers(): { id: string; name: string; score: number | null; done: boolean }[] {
+    if (!this.room?.players) return [];
+    return Object.entries(this.room.players).map(([id, p]) => ({ id, ...p }));
+  }
+
+  async startGame(): Promise<void> {
+    if (this.roomId) await this.lobby.startRoom(this.roomId);
+  }
+
+  async backToLobby(): Promise<void> {
+    await this.router.navigate(['/tabs/tab2']);
+  }
+
+  private allDone(room: LobbyRoom): boolean {
+    if (!room.players) return false;
+    const players = Object.values(room.players);
+    return players.length > 0 && players.every(p => p.done);
+  }
+
+  private showScoreboard(room: LobbyRoom): void {
+    if (this.scoreboardVisible) return;
+    this.scoreboard = Object.values(room.players ?? {})
+      .sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+    this.scoreboardVisible = true;
+>>>>>>> Stashed changes
   }
 
   ionViewWillLeave(): void {
@@ -87,6 +180,7 @@ export class SequencePage implements OnDestroy {
   }
 
   private async hydrate(): Promise<void> {
+<<<<<<< Updated upstream
     const saved = await this.storage.getJson<{
       scenarioId?: string;
       slots?: (string | null)[];
@@ -97,6 +191,15 @@ export class SequencePage implements OnDestroy {
       Array.isArray(saved.slots) &&
       saved.slots.length === n
     ) {
+=======
+    if (this.roomId) {
+      this.slots = [null, null, null, null];
+      this.recount();
+      return;
+    }
+    const saved = await this.storage.getJson<{ slots: (string | null)[] }>(STORAGE_KEYS.SEQUENCE);
+    if (saved?.slots?.length === 4) {
+>>>>>>> Stashed changes
       this.slots = saved.slots;
       this.recount();
     }
@@ -118,9 +221,7 @@ export class SequencePage implements OnDestroy {
   }
 
   pickFromBank(id: string): void {
-    if (!this.isInBank(id)) {
-      return;
-    }
+    if (!this.isInBank(id)) return;
     this.selectedId = this.selectedId === id ? null : id;
     this.verifyState = 'idle';
   }
@@ -163,22 +264,23 @@ export class SequencePage implements OnDestroy {
   async onDrop(index: number, ev: DragEvent): Promise<void> {
     ev.preventDefault();
     const id = this.draggingId ?? (ev.dataTransfer?.getData('text/plain') || null);
-    if (!id || !this.isInBank(id)) {
-      return;
-    }
-    if (this.slots[index] !== null) {
-      return;
-    }
+    if (!id || !this.isInBank(id)) return;
+    if (this.slots[index] !== null) return;
     this.slots[index] = id;
     this.recount();
     await this.persist();
   }
 
   labelFor(id: string | null): string {
+<<<<<<< Updated upstream
     if (!id) {
       return '';
     }
     return this.scenario.steps.find((b) => b.id === id)?.title ?? id;
+=======
+    if (!id) return '';
+    return this.bank.find((b) => b.id === id)?.title ?? id;
+>>>>>>> Stashed changes
   }
 
   async verify(): Promise<void> {
@@ -191,7 +293,13 @@ export class SequencePage implements OnDestroy {
       const prev = raw != null ? Number.parseInt(raw, 10) || 0 : 0;
       await this.storage.set(STORAGE_KEYS.TOTAL_POINTS, String(prev + this.bonusPoints));
       await this.storage.set(STORAGE_KEYS.ACHIEVEMENTS, '9');
+<<<<<<< Updated upstream
       this.goHomeAfterDelay();
+=======
+      if (this.roomId) {
+        await this.lobby.submitScore(this.roomId, this.bonusPoints);
+      }
+>>>>>>> Stashed changes
     }
   }
 }

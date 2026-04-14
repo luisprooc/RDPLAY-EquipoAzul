@@ -1,8 +1,8 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import {
   Firestore,
-  collection, doc, setDoc, deleteDoc, addDoc, updateDoc,
-  query, orderBy, onSnapshot, serverTimestamp, Timestamp,
+  collection, doc, setDoc, deleteDoc, addDoc, updateDoc, getDoc,
+  query, orderBy, onSnapshot, serverTimestamp, Timestamp, increment,
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { StorageService } from './storage.service';
@@ -16,15 +16,22 @@ export interface LobbyPlayer {
   lastSeen: Timestamp | null;
 }
 
+export interface RoomPlayer {
+  name: string;
+  score: number | null;
+  done: boolean;
+}
+
 export interface LobbyRoom {
   id: string;
   hostId: string;
   hostName: string;
   game: 'quiz' | 'memory' | 'sequence';
-  status: 'waiting' | 'in-progress';
+  status: 'waiting' | 'in-progress' | 'finished';
   playerCount: number;
   maxPlayers: number;
   createdAt: Timestamp | null;
+  players?: Record<string, RoomPlayer>;
 }
 
 const TWO_MIN_MS = 2 * 60 * 1000;
@@ -98,6 +105,21 @@ export class LobbyService implements OnDestroy {
     });
   }
 
+  /** Realtime stream of a single room document. */
+  watchRoom(roomId: string): Observable<LobbyRoom> {
+    return new Observable(subscriber => {
+      const unsub = onSnapshot(
+        doc(this.firestore, 'lobby_rooms', roomId),
+        snap => {
+          if (!snap.exists()) { subscriber.error(new Error('Sala no encontrada')); return; }
+          subscriber.next({ id: snap.id, ...snap.data() } as LobbyRoom);
+        },
+        err => subscriber.error(err),
+      );
+      return () => unsub();
+    });
+  }
+
   async createRoom(game: 'quiz' | 'memory' | 'sequence'): Promise<string> {
     const name = (await this.storage.get(STORAGE_KEYS.DISPLAY_NAME)) ?? 'Jugador';
     const ref = await addDoc(collection(this.firestore, 'lobby_rooms'), {
@@ -108,8 +130,39 @@ export class LobbyService implements OnDestroy {
       playerCount: 1,
       maxPlayers: 4,
       createdAt: serverTimestamp(),
+      players: {
+        [this.currentPlayerId!]: { name, score: null, done: false },
+      },
     });
     return ref.id;
+  }
+
+  async joinRoom(roomId: string): Promise<void> {
+    const name = (await this.storage.get(STORAGE_KEYS.DISPLAY_NAME)) ?? 'Jugador';
+    await updateDoc(doc(this.firestore, 'lobby_rooms', roomId), {
+      playerCount: increment(1),
+      [`players.${this.currentPlayerId}`]: { name, score: null, done: false },
+    });
+    if (this.currentPlayerId) {
+      await updateDoc(doc(this.firestore, 'lobby_players', this.currentPlayerId), {
+        status: 'in-lobby',
+      });
+    }
+  }
+
+  /** Host calls this to start the game for all players in the room. */
+  async startRoom(roomId: string): Promise<void> {
+    await updateDoc(doc(this.firestore, 'lobby_rooms', roomId), {
+      status: 'in-progress',
+    });
+  }
+
+  /** Called at game end to record the player's final score. */
+  async submitScore(roomId: string, score: number): Promise<void> {
+    await updateDoc(doc(this.firestore, 'lobby_rooms', roomId), {
+      [`players.${this.currentPlayerId}.score`]: score,
+      [`players.${this.currentPlayerId}.done`]: true,
+    });
   }
 
   async unregisterPlayer(): Promise<void> {

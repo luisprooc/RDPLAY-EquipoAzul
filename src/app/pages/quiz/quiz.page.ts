@@ -1,10 +1,17 @@
 import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+<<<<<<< Updated upstream
 import { StorageService } from '../../core/storage.service';
 import { STORAGE_KEYS } from '../../core/storage.keys';
 import { QuizQuestion } from './quiz-question.model';
 import { QUIZ_QUESTION_BANK } from './quiz-questions.data';
 import { pickRandomQuestions } from './quiz-utils';
+=======
+import { Subscription } from 'rxjs';
+import { StorageService } from '../../core/storage.service';
+import { STORAGE_KEYS } from '../../core/storage.keys';
+import { LobbyService, LobbyRoom, RoomPlayer } from '../../core/lobby.service';
+>>>>>>> Stashed changes
 
 const HOME_DELAY_MS = 2800;
 
@@ -30,6 +37,7 @@ export class QuizPage implements OnDestroy {
   revealed = false;
   finished = false;
 
+<<<<<<< Updated upstream
   private timer: ReturnType<typeof setInterval> | null = null;
   private homeTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -58,16 +66,67 @@ export class QuizPage implements OnDestroy {
       return;
     }
     this.startQuestion();
+=======
+  // Multiplayer state
+  roomId: string | null = null;
+  room: LobbyRoom | null = null;
+  isHost = false;
+  waitingPhase = false;
+  scoreboardVisible = false;
+  scoreboard: { name: string; score: number | null }[] = [];
+
+  private timer: ReturnType<typeof setInterval> | null = null;
+  private roomSub?: Subscription;
+
+  constructor(
+    private readonly storage: StorageService,
+    private readonly lobby: LobbyService,
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+  ) {}
+
+  ionViewWillEnter(): void {
+    this.roomId = this.route.snapshot.queryParamMap.get('roomId');
+    if (this.roomId) {
+      this.waitingPhase = true;
+      this.roomSub = this.lobby.watchRoom(this.roomId).subscribe(room => {
+        this.room = room;
+        this.isHost = room.hostId === this.lobby.currentPlayerId;
+        if (room.status === 'in-progress' && this.waitingPhase) {
+          this.waitingPhase = false;
+          void this.hydrate();
+          this.startQuestion();
+        }
+        if (room.status === 'finished' || this.allDone(room)) {
+          this.showScoreboard(room);
+        }
+      });
+    } else {
+      void this.hydrate();
+      this.startQuestion();
+    }
+>>>>>>> Stashed changes
   }
 
   ionViewWillLeave(): void {
     this.clearTimer();
+<<<<<<< Updated upstream
     this.clearHomeTimer();
+=======
+    this.roomSub?.unsubscribe();
+    this.roomSub = undefined;
+    this.waitingPhase = false;
+    this.scoreboardVisible = false;
+>>>>>>> Stashed changes
   }
 
   ngOnDestroy(): void {
     this.clearTimer();
+<<<<<<< Updated upstream
     this.clearHomeTimer();
+=======
+    this.roomSub?.unsubscribe();
+>>>>>>> Stashed changes
   }
 
   get progress(): number {
@@ -81,14 +140,55 @@ export class QuizPage implements OnDestroy {
     return this.questions[this.index];
   }
 
+<<<<<<< Updated upstream
+=======
+  get roomPlayers(): { id: string; name: string; score: number | null; done: boolean }[] {
+    if (!this.room?.players) return [];
+    return Object.entries(this.room.players).map(([id, p]) => ({ id, ...p }));
+  }
+
+  async startGame(): Promise<void> {
+    if (this.roomId) await this.lobby.startRoom(this.roomId);
+  }
+
+  private allDone(room: LobbyRoom): boolean {
+    if (!room.players) return false;
+    const players = Object.values(room.players);
+    return players.length > 0 && players.every(p => p.done);
+  }
+
+  private showScoreboard(room: LobbyRoom): void {
+    if (this.scoreboardVisible) return;
+    this.clearTimer();
+    this.scoreboard = Object.values(room.players ?? {})
+      .sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+    this.scoreboardVisible = true;
+  }
+
+  async backToLobby(): Promise<void> {
+    await this.router.navigate(['/tabs/tab2']);
+  }
+
+  private async hydrate(): Promise<void> {
+    if (this.roomId) {
+      this.index = 0;
+      this.score = 0;
+      return;
+    }
+    const saved = await this.storage.getJson<{ index: number; score: number }>(STORAGE_KEYS.QUIZ);
+    if (saved) {
+      this.index = Math.min(Math.max(saved.index, 0), this.questions.length - 1);
+      this.score = saved.score;
+    }
+  }
+
+>>>>>>> Stashed changes
   private async persistRoundState(): Promise<void> {
     await this.storage.setJson(STORAGE_KEYS.QUIZ, { index: this.index, score: this.score });
   }
 
   private async addToTotal(points: number): Promise<void> {
-    if (points <= 0) {
-      return;
-    }
+    if (points <= 0) return;
     const raw = await this.storage.get(STORAGE_KEYS.TOTAL_POINTS);
     const prev = raw != null ? Number.parseInt(raw, 10) || 0 : 0;
     await this.storage.set(STORAGE_KEYS.TOTAL_POINTS, String(prev + points));
@@ -136,9 +236,13 @@ export class QuizPage implements OnDestroy {
   }
 
   async onPick(optionIndex: number | null): Promise<void> {
+<<<<<<< Updated upstream
     if (this.revealed || this.finished || this.questions.length === 0) {
       return;
     }
+=======
+    if (this.revealed) return;
+>>>>>>> Stashed changes
     this.clearTimer();
     this.revealed = true;
     this.selected = optionIndex;
@@ -152,8 +256,9 @@ export class QuizPage implements OnDestroy {
     }
 
     await this.addToTotal(earned);
-    await this.persistRoundState();
+    if (!this.roomId) await this.persistRoundState();
 
+<<<<<<< Updated upstream
     const isLast = this.index >= this.questions.length - 1;
     if (isLast) {
       this.finished = true;
@@ -165,6 +270,22 @@ export class QuizPage implements OnDestroy {
     setTimeout(() => {
       this.index += 1;
       this.startQuestion();
+=======
+    setTimeout(async () => {
+      if (this.index >= this.questions.length - 1) {
+        if (this.roomId) {
+          await this.lobby.submitScore(this.roomId, this.score);
+        } else {
+          await this.storage.setJson(STORAGE_KEYS.QUIZ, { index: 0, score: 0 });
+          this.index = 0;
+          this.score = 0;
+          this.startQuestion();
+        }
+      } else {
+        this.index += 1;
+        this.startQuestion();
+      }
+>>>>>>> Stashed changes
     }, 1600);
   }
 }

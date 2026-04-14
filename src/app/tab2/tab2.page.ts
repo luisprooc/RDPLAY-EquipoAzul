@@ -1,5 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
 import { ActionSheetController, ToastController } from '@ionic/angular';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { LobbyService, LobbyPlayer, LobbyRoom } from '../core/lobby.service';
 
@@ -20,6 +21,7 @@ export class Tab2Page implements OnDestroy {
     private lobby: LobbyService,
     private actionSheet: ActionSheetController,
     private toast: ToastController,
+    private router: Router,
   ) {}
 
   async ionViewWillEnter(): Promise<void> {
@@ -63,16 +65,20 @@ export class Tab2Page implements OnDestroy {
     const { data } = await sheet.onDidDismiss<'quiz' | 'memory' | 'sequence'>();
     if (!data) return;
     try {
-      await this.lobby.createRoom(data);
-      await this.showToast('Sala creada. ¡Esperando jugadores…');
+      const roomId = await this.lobby.createRoom(data);
+      await this.router.navigate([data], { queryParams: { roomId } });
     } catch {
       await this.showToast('Error al crear sala. Intenta de nuevo.', 'danger');
     }
   }
 
   async joinRoom(room: LobbyRoom): Promise<void> {
-    // TODO: navigate to game page with roomId once game screens exist
-    await this.showToast(`Uniéndote a sala de ${room.hostName}…`);
+    try {
+      await this.lobby.joinRoom(room.id);
+      await this.router.navigate([room.game], { queryParams: { roomId: room.id } });
+    } catch {
+      await this.showToast('Error al unirse a la sala. Intenta de nuevo.', 'danger');
+    }
   }
 
   async invitePlayer(player: LobbyPlayer): Promise<void> {

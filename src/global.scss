@@ -34,3 +34,81 @@ html {
 ion-content.rd-page {
   --background: var(--rd-bg);
 }
+
+/* Multiplayer overlays */
+.mp-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+
+  .mp-box {
+    background: var(--ion-color-light, #fff);
+    border-radius: 20px;
+    padding: 32px 24px;
+    width: 100%;
+    max-width: 360px;
+    text-align: center;
+
+    .mp-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      margin: 0 0 6px;
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .mp-sub {
+      color: var(--ion-color-medium);
+      font-size: 0.85rem;
+      margin-bottom: 20px;
+    }
+
+    .mp-players {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .mp-player {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--ion-color-light-shade, #f4f4f4);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-weight: 500;
+      ion-icon { font-size: 20px; }
+    }
+
+    .mp-wait {
+      color: var(--ion-color-medium);
+      font-size: 0.85rem;
+      margin-top: 12px;
+    }
+
+    .mp-score-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: var(--ion-color-light-shade, #f4f4f4);
+      margin-bottom: 8px;
+
+      .mp-rank { font-weight: 700; width: 20px; }
+      .mp-name { flex: 1; text-align: left; }
+      .mp-pts { font-weight: 700; color: var(--ion-color-secondary); }
+    }
+
+    ion-button { margin-top: 16px; }
+  }
+}

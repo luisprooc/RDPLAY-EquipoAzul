@@ -1,5 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+<<<<<<< Updated upstream
 import { StorageService } from '../../core/storage.service';
 import { STORAGE_KEYS } from '../../core/storage.keys';
 import { MEMORY_PAIR_BANK, MemoryPairDef } from './memory-pairs.data';
@@ -18,6 +19,12 @@ const TIMER_SECONDS: Record<string, number> = {
   medium: 240,
   hard: 420,
 };
+=======
+import { Subscription } from 'rxjs';
+import { StorageService } from '../../core/storage.service';
+import { STORAGE_KEYS } from '../../core/storage.keys';
+import { LobbyService, LobbyRoom } from '../../core/lobby.service';
+>>>>>>> Stashed changes
 
 type Card = { id: number; key: string; label: string; icon: string; flipped: boolean; matched: boolean };
 
@@ -45,6 +52,7 @@ export class MemoryPage implements OnDestroy {
   private seconds = 120;
   private homeTimer: ReturnType<typeof setTimeout> | null = null;
 
+<<<<<<< Updated upstream
   constructor(
     private readonly storage: StorageService,
     private readonly router: Router,
@@ -72,16 +80,91 @@ export class MemoryPage implements OnDestroy {
     };
 
     void this.bootstrap();
+=======
+  // Multiplayer state
+  roomId: string | null = null;
+  room: LobbyRoom | null = null;
+  isHost = false;
+  waitingPhase = false;
+  scoreboardVisible = false;
+  scoreboard: { name: string; score: number | null }[] = [];
+
+  private roomSub?: Subscription;
+
+  constructor(
+    private readonly storage: StorageService,
+    private readonly lobby: LobbyService,
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+  ) {}
+
+  ionViewWillEnter(): void {
+    this.roomId = this.route.snapshot.queryParamMap.get('roomId');
+    if (this.roomId) {
+      this.waitingPhase = true;
+      this.roomSub = this.lobby.watchRoom(this.roomId).subscribe(room => {
+        this.room = room;
+        this.isHost = room.hostId === this.lobby.currentPlayerId;
+        if (room.status === 'in-progress' && this.waitingPhase) {
+          this.waitingPhase = false;
+          void this.bootstrap();
+        }
+        if (room.status === 'finished' || this.allDone(room)) {
+          this.showScoreboard(room);
+        }
+      });
+    } else {
+      void this.bootstrap();
+    }
+>>>>>>> Stashed changes
   }
 
   ionViewWillLeave(): void {
     this.clearTimer();
+<<<<<<< Updated upstream
     this.clearHomeTimer();
+=======
+    this.roomSub?.unsubscribe();
+    this.roomSub = undefined;
+    this.waitingPhase = false;
+    this.scoreboardVisible = false;
+>>>>>>> Stashed changes
   }
 
   ngOnDestroy(): void {
     this.clearTimer();
+<<<<<<< Updated upstream
     this.clearHomeTimer();
+=======
+    this.roomSub?.unsubscribe();
+  }
+
+  get roomPlayers(): { id: string; name: string; score: number | null; done: boolean }[] {
+    if (!this.room?.players) return [];
+    return Object.entries(this.room.players).map(([id, p]) => ({ id, ...p }));
+  }
+
+  async startGame(): Promise<void> {
+    if (this.roomId) await this.lobby.startRoom(this.roomId);
+  }
+
+  async backToLobby(): Promise<void> {
+    await this.router.navigate(['/tabs/tab2']);
+  }
+
+  private allDone(room: LobbyRoom): boolean {
+    if (!room.players) return false;
+    const players = Object.values(room.players);
+    return players.length > 0 && players.every(p => p.done);
+  }
+
+  private showScoreboard(room: LobbyRoom): void {
+    if (this.scoreboardVisible) return;
+    this.clearTimer();
+    this.scoreboard = Object.values(room.players ?? {})
+      .sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+    this.scoreboardVisible = true;
+>>>>>>> Stashed changes
   }
 
   private async bootstrap(): Promise<void> {
@@ -89,9 +172,7 @@ export class MemoryPage implements OnDestroy {
     const raw = await this.storage.get(STORAGE_KEYS.TOTAL_POINTS);
     if (raw != null) {
       const n = Number.parseInt(raw, 10);
-      if (!Number.isNaN(n)) {
-        this.points = Math.max(this.points, n);
-      }
+      if (!Number.isNaN(n)) this.points = Math.max(this.points, n);
     }
     this.resetBoard();
     this.startTimer();
@@ -104,6 +185,7 @@ export class MemoryPage implements OnDestroy {
     this.clearTimer();
     this.updateTimeLabel();
     this.timer = setInterval(() => {
+<<<<<<< Updated upstream
       if (this.completed) {
         this.clearTimer();
         return;
@@ -111,10 +193,14 @@ export class MemoryPage implements OnDestroy {
       if (this.paused) {
         return;
       }
+=======
+      if (this.paused) return;
+>>>>>>> Stashed changes
       this.seconds -= 1;
       if (this.seconds <= 0) {
         this.seconds = 0;
         this.clearTimer();
+        if (this.roomId) void this.lobby.submitScore(this.roomId, this.points);
       }
       this.updateTimeLabel();
     }, 1000);
@@ -191,17 +277,13 @@ export class MemoryPage implements OnDestroy {
   }
 
   async onCardTap(card: Card): Promise<void> {
-    if (this.lock || this.paused || card.matched || card.flipped) {
-      return;
-    }
+    if (this.lock || this.paused || card.matched || card.flipped) return;
     card.flipped = true;
     if (!this.first) {
       this.first = card;
       return;
     }
-    if (this.first.id === card.id) {
-      return;
-    }
+    if (this.first.id === card.id) return;
     this.lock = true;
     const a = this.first;
     const b = card;
@@ -213,10 +295,16 @@ export class MemoryPage implements OnDestroy {
       this.points += 120;
       await this.persistPoints();
       this.lock = false;
+<<<<<<< Updated upstream
       if (this.pairsFound >= this.pairTotal) {
         this.completed = true;
         this.clearTimer();
         this.goHomeAfterDelay();
+=======
+      if (this.pairsFound === this.pairTotal && this.roomId) {
+        this.clearTimer();
+        await this.lobby.submitScore(this.roomId, this.points);
+>>>>>>> Stashed changes
       }
       return;
     }
