@@ -1,0 +1,51 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>🏆 Ranking RDPlay</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="load()">
+        <ion-icon name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- Filtro por juego -->
+  <ion-segment [value]="selectedGame" (ionChange)="onGameChange($event)" scrollable>
+    <ion-segment-button *ngFor="let g of games" [value]="g.value">
+      <ion-label>{{ g.label }}</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="ion-text-center ion-padding">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Cargando ranking...</p>
+  </div>
+
+  <!-- Sin resultados -->
+  <div *ngIf="!isLoading && scores.length === 0" class="ion-text-center ion-padding">
+    <ion-icon name="trophy-outline" size="large" color="medium"></ion-icon>
+    <p>Aún no hay puntajes registrados.</p>
+    <p>¡Sé el primero en jugar!</p>
+  </div>
+
+  <!-- Lista de puntajes -->
+  <ion-list *ngIf="!isLoading && scores.length > 0" lines="full">
+    <ion-item *ngFor="let entry of scores; let i = index"
+              [color]="i === 0 ? 'warning' : ''">
+      <ion-avatar slot="start">
+        <div class="medal">{{ getMedal(i) }}</div>
+      </ion-avatar>
+      <ion-label>
+        <h2>{{ entry.playerName }}</h2>
+        <p>{{ entry.game | titlecase }} · {{ entry.createdAt?.toDate() | date:'dd/MM/yyyy' }}</p>
+      </ion-label>
+      <ion-note slot="end" color="primary">
+        <strong>{{ entry.score }} pts</strong>
+      </ion-note>
+    </ion-item>
+  </ion-list>
+
+</ion-content>
