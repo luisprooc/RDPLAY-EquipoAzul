@@ -13,16 +13,16 @@
 <ion-content class="rd-page seq">
   <div class="ion-padding">
     <ion-badge color="warning" class="pill">¡Dale el orden!</ion-badge>
-    <h1>Secuencia del café dominicano</h1>
+    <h1>{{ scenario.title }}</h1>
     <p class="sub">
-      Organiza los pasos para preparar el mejor café del Caribe, desde la mata hasta la taza.
+      {{ scenario.subtitle }}
     </p>
 
     <div class="bank">
       <button
         type="button"
         class="bank-card"
-        *ngFor="let s of bank"
+        *ngFor="let s of shuffledBank"
         [hidden]="!isInBank(s.id)"
         [class.picked]="selectedId === s.id"
         draggable="true"
@@ -31,7 +31,7 @@
         (click)="pickFromBank(s.id)"
       >
         <span class="info" aria-hidden="true">i</span>
-        <div class="ico" [attr.data-kind]="s.id"></div>
+        <div class="ico" [attr.data-palette]="s.palette"></div>
         <p>{{ s.title }}</p>
       </button>
     </div>
@@ -39,8 +39,8 @@
     <div class="drop-panel">
       <div class="drop-head">
         <span>Coloca en orden:</span>
-        <ion-badge [color]="placedCount === 4 ? 'success' : 'medium'">
-          {{ placedCount }}/4 LISTO
+        <ion-badge [color]="placedCount === slotCount ? 'success' : 'medium'">
+          {{ placedCount }}/{{ slotCount }} LISTO
         </ion-badge>
       </div>
 
@@ -66,14 +66,19 @@
         expand="block"
         color="secondary"
         class="verify"
-        [disabled]="placedCount !== 4"
+        [disabled]="placedCount !== slotCount || completed"
         (click)="verify()"
       >
         <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
         Verificar orden
       </ion-button>
 
-      <ion-text color="success" *ngIf="verifyState === 'ok'">
+      <div class="seq-done-banner" *ngIf="completed" role="status">
+        <ion-icon name="checkmark-circle" color="success"></ion-icon>
+        <p>¡Orden perfecto! Volviendo al inicio…</p>
+      </div>
+
+      <ion-text color="success" *ngIf="verifyState === 'ok' && !completed">
         <p class="feedback">¡Correcto! +{{ bonusPoints }} puntos guardados localmente.</p>
       </ion-text>
       <ion-text color="danger" *ngIf="verifyState === 'bad'">
@@ -82,17 +87,17 @@
     </div>
 
     <ion-card class="hist">
-      <h3>Un toque de historia</h3>
+      <h3>{{ scenario.historyTitle }}</h3>
       <p>
-        El café llegó a la isla en 1735 y el tostado artesanal sigue siendo parte del sabor criollo.
+        {{ scenario.historyBody }}
       </p>
       <div class="hist-foot"><ion-icon name="information-circle-outline"></ion-icon> SABÍAS QUE…</div>
     </ion-card>
 
     <ion-card class="reward">
       <div class="rw-icon"><ion-icon name="trophy"></ion-icon></div>
-      <h2>+150 puntos</h2>
-      <p>Completa este reto sin errores para ganar el logro “Barista del Cibao”.</p>
+      <h2>+{{ bonusPoints }} puntos</h2>
+      <p>{{ scenario.rewardBlurb }}</p>
     </ion-card>
   </div>
 </ion-content>

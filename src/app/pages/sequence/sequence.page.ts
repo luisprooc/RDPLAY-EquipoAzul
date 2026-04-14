@@ -1,8 +1,15 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
 import { StorageService } from '../../core/storage.service';
 import { STORAGE_KEYS } from '../../core/storage.keys';
+import {
+  SEQUENCE_SCENARIOS,
+  SequenceScenarioDef,
+  SequenceStepDef,
+  shuffleSequenceSteps,
+} from './sequence-scenarios.data';
 
-type Step = { id: string; title: string; hint: string };
+const HOME_DELAY_MS = 2800;
 
 @Component({
   selector: 'app-sequence',
@@ -10,18 +17,11 @@ type Step = { id: string; title: string; hint: string };
   styleUrls: ['./sequence.page.scss'],
   standalone: false,
 })
-export class SequencePage {
-  readonly bank: Step[] = [
-    { id: 'molido', title: 'Molido', hint: 'Líneas marrones' },
-    { id: 'grano', title: 'Grano', hint: 'En la mata' },
-    { id: 'taza', title: 'Taza', hint: 'Listo para beber' },
-    { id: 'tostado', title: 'Tostado', hint: 'Fuego y aroma' },
-  ];
+export class SequencePage implements OnDestroy {
+  scenario: SequenceScenarioDef = SEQUENCE_SCENARIOS[0];
+  shuffledBank: SequenceStepDef[] = shuffleSequenceSteps(SEQUENCE_SCENARIOS[0].steps);
 
-  /** Orden correcto: grano → tostado → molido → taza */
-  readonly correctOrder = ['grano', 'tostado', 'molido', 'taza'];
-
-  slots: (string | null)[] = [null, null, null, null];
+  slots: (string | null)[] = Array(SEQUENCE_SCENARIOS[0].correctOrder.length).fill(null);
   placedCount = 0;
 
   draggingId: string | null = null;
@@ -30,23 +30,83 @@ export class SequencePage {
   verifyState: 'idle' | 'ok' | 'bad' = 'idle';
 
   bonusPoints = 150;
+  completed = false;
 
-  constructor(private readonly storage: StorageService) {}
+  private homeTimer: ReturnType<typeof setTimeout> | null = null;
+
+  constructor(
+    private readonly storage: StorageService,
+    private readonly router: Router,
+  ) {
+    this.applyScenario(SEQUENCE_SCENARIOS[Math.floor(Math.random() * SEQUENCE_SCENARIOS.length)]);
+  }
+
+  get slotCount(): number {
+    return this.scenario.correctOrder.length;
+  }
 
   ionViewWillEnter(): void {
+    this.completed = false;
+    this.verifyState = 'idle';
+    this.clearHomeTimer();
+    const picked = SEQUENCE_SCENARIOS[Math.floor(Math.random() * SEQUENCE_SCENARIOS.length)];
+    this.applyScenario(picked);
     void this.hydrate();
   }
 
+  ionViewWillLeave(): void {
+    this.clearHomeTimer();
+  }
+
+  ngOnDestroy(): void {
+    this.clearHomeTimer();
+  }
+
+  private applyScenario(s: SequenceScenarioDef): void {
+    this.scenario = s;
+    this.bonusPoints = s.bonusPoints;
+    this.shuffledBank = shuffleSequenceSteps(s.steps);
+    this.slots = Array(s.correctOrder.length).fill(null);
+    this.selectedId = null;
+    this.draggingId = null;
+    this.placedCount = 0;
+  }
+
+  private clearHomeTimer(): void {
+    if (this.homeTimer) {
+      clearTimeout(this.homeTimer);
+      this.homeTimer = null;
+    }
+  }
+
+  private goHomeAfterDelay(): void {
+    this.clearHomeTimer();
+    this.homeTimer = setTimeout(() => {
+      void this.router.navigateByUrl('/tabs/tab1', { replaceUrl: true });
+    }, HOME_DELAY_MS);
+  }
+
   private async hydrate(): Promise<void> {
-    const saved = await this.storage.getJson<{ slots: (string | null)[] }>(STORAGE_KEYS.SEQUENCE);
-    if (saved?.slots?.length === 4) {
+    const saved = await this.storage.getJson<{
+      scenarioId?: string;
+      slots?: (string | null)[];
+    }>(STORAGE_KEYS.SEQUENCE);
+    const n = this.slotCount;
+    if (
+      saved?.scenarioId === this.scenario.id &&
+      Array.isArray(saved.slots) &&
+      saved.slots.length === n
+    ) {
       this.slots = saved.slots;
       this.recount();
     }
   }
 
   private async persist(): Promise<void> {
-    await this.storage.setJson(STORAGE_KEYS.SEQUENCE, { slots: this.slots });
+    await this.storage.setJson(STORAGE_KEYS.SEQUENCE, {
+      scenarioId: this.scenario.id,
+      slots: this.slots,
+    });
   }
 
   private recount(): void {
@@ -118,17 +178,20 @@ export class SequencePage {
     if (!id) {
       return '';
     }
-    return this.bank.find((b) => b.id === id)?.title ?? id;
+    return this.scenario.steps.find((b) => b.id === id)?.title ?? id;
   }
 
   async verify(): Promise<void> {
-    const ok = this.slots.every((v, i) => v === this.correctOrder[i]);
+    const order = this.scenario.correctOrder;
+    const ok = this.slots.every((v, i) => v === order[i]);
     this.verifyState = ok ? 'ok' : 'bad';
     if (ok) {
+      this.completed = true;
       const raw = await this.storage.get(STORAGE_KEYS.TOTAL_POINTS);
       const prev = raw != null ? Number.parseInt(raw, 10) || 0 : 0;
       await this.storage.set(STORAGE_KEYS.TOTAL_POINTS, String(prev + this.bonusPoints));
       await this.storage.set(STORAGE_KEYS.ACHIEVEMENTS, '9');
+      this.goHomeAfterDelay();
     }
   }
 }

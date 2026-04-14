@@ -14,7 +14,7 @@ de la app: entretenimiento dominicano accesible para todos.
 ## Hito 2 (stack técnico)
 
 - **Ionic + Angular + Capacitor** en este repositorio.
-- **Firebase**: configuración base con `initializeApp` en `AppModule` (sustituye los valores `REPLACE_ME` en `src/environments/environment.ts` y `environment.prod.ts` con tu proyecto en la consola de Firebase).
+- **Firebase**: credenciales en `.env` (variables `FIREBASE_*`; puedes partir de `.env.example`). `src/environments/environment.ts` y `environment.prod.ts` leen `process.env.FIREBASE_*`, inyectadas al compilar por `custom-webpack.config.cjs` (DefinePlugin + `dotenv`). `AppModule` solo inicializa Firebase si la API key no es `REPLACE_ME`.
 - **Navegación**: pestañas Inicio / Lobby / Retos / Perfil; rutas de juego `/quiz`, `/memory`, `/sequence`; menú lateral (`ion-menu`) y `ion-back-button` en minijuegos.
 - **Gestos**: `ion-refresher` (Lobby), arrastrar y soltar + toque para colocar fichas (secuencia del café), volteo de tarjetas en memoria (tap), temporizador en el quiz.
 - **Almacenamiento local**: `@capacitor/preferences` vía `StorageService` (`src/app/core/storage.service.ts`) para puntos, nombre y estado de juegos.

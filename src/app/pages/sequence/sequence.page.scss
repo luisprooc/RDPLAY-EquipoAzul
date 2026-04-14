@@ -43,6 +43,15 @@
   background: #fff;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
   min-height: 110px;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    outline-color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bank-card:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 .bank-card.picked {
@@ -73,15 +82,15 @@
   background: #f2f3f5;
 }
 
-.bank-card .ico[data-kind='grano'] {
+.bank-card .ico[data-palette='leaf'] {
   background: linear-gradient(135deg, #d7f5d0, #9ed89a);
 }
 
-.bank-card .ico[data-kind='tostado'] {
+.bank-card .ico[data-palette='fire'] {
   background: linear-gradient(135deg, #ffd7d7, #ff8a8a);
 }
 
-.bank-card .ico[data-kind='molido'] {
+.bank-card .ico[data-palette='sun'] {
   background: repeating-linear-gradient(
     45deg,
     #e8d8c8,
@@ -91,7 +100,7 @@
   );
 }
 
-.bank-card .ico[data-kind='taza'] {
+.bank-card .ico[data-palette='ocean'] {
   background: linear-gradient(180deg, #dbe8ff, #9fb7ff);
 }
 
@@ -133,6 +142,14 @@
   text-align: center;
   font-weight: 800;
   color: #555;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease;
+}
+
+.slot:active {
+  transform: scale(0.99);
 }
 
 .slot.filled {
@@ -173,6 +190,36 @@
 .feedback {
   margin-top: 10px;
   font-weight: 700;
+}
+
+.seq-done-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  margin-top: 12px;
+  border-radius: 14px;
+  background: #e8f5e9;
+  color: #1b5e20;
+  font-weight: 700;
+  font-size: 0.92rem;
+  animation: seq-fade-in 0.35s ease;
+}
+
+.seq-done-banner ion-icon {
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+@keyframes seq-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .hist {

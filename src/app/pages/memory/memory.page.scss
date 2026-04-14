@@ -75,9 +75,28 @@
 .board {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  gap: 8px;
   padding: 12px 0 8px;
+}
+
+.board--easy {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.board--medium {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.board--hard {
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+}
+
+@media (max-width: 400px) {
+  .board--hard {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 .board::before {
@@ -97,8 +116,24 @@
   position: relative;
   aspect-ratio: 1;
   border-radius: 50%;
-  perspective: 800px;
+  perspective: 640px;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tile-flip {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.42s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 50%;
+  will-change: transform;
+}
+
+.tile.flipped .tile-flip,
+.tile.matched .tile-flip {
+  transform: rotateY(180deg);
 }
 
 .face {
@@ -110,11 +145,15 @@
   align-items: center;
   justify-content: center;
   backface-visibility: hidden;
-  transition: transform 0.55s ease;
+  -webkit-backface-visibility: hidden;
   border: 4px solid #1a3a6e;
   background: #1a3a6e;
   color: #dbe8ff;
   font-weight: 900;
+}
+
+.face.back {
+  transform: rotateY(0deg);
 }
 
 .face.front {
@@ -124,16 +163,45 @@
   border-color: #f5c542;
 }
 
-.tile.flipped .face.back {
-  transform: rotateY(180deg);
-}
-
-.tile.flipped .face.front {
-  transform: rotateY(0);
-}
-
 .tile.matched .face.front {
   border-color: #2dd36f;
+  box-shadow: 0 0 0 2px rgba(45, 211, 111, 0.35);
+}
+
+.board-dim {
+  pointer-events: none;
+  opacity: 0.9;
+  transition: opacity 0.35s ease;
+}
+
+.memory-done-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  margin: 12px 0 0;
+  border-radius: 14px;
+  background: #fff8e6;
+  color: #5d4a00;
+  font-weight: 700;
+  font-size: 0.95rem;
+  animation: memory-fade-in 0.35s ease;
+}
+
+.memory-done-banner ion-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+@keyframes memory-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .ico {

@@ -1,0 +1,77 @@
+.rd-avatar {
+  width: 36px;
+  height: 36px;
+}
+
+.rd-flag {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(#002d62 0 120deg, #ce1126 120deg 240deg, #fff 240deg 360deg);
+}
+
+.quiz-diff .eyebrow {
+  color: var(--rd-navy);
+  font-weight: 800;
+  font-size: 0.9rem;
+  margin: 0 0 6px;
+}
+
+.quiz-diff h1 {
+  margin: 0 0 8px;
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: #111;
+}
+
+.sub {
+  color: #666;
+  margin: 0 0 18px;
+  line-height: 1.45;
+}
+
+.diff-card {
+  border-radius: 18px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.diff-card:active {
+  transform: scale(0.98);
+}
+
+.diff-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+
+.diff-badge.easy {
+  background: #e8f5e9;
+  color: #1b5e20;
+}
+
+.diff-badge.medium {
+  background: #fff8e1;
+  color: #f57f17;
+}
+
+.diff-badge.hard {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.diff-card ion-card-content {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0;
+}
+
+.diff-card ion-icon {
+  font-size: 36px;
+}

@@ -1,7 +1,7 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/tabs/tab3" text="Atrás"></ion-back-button>
+      <ion-back-button defaultHref="/memory" text="Atrás"></ion-back-button>
     </ion-buttons>
     <ion-title class="rd-brand">RDPlay</ion-title>
     <ion-buttons slot="end">
@@ -29,7 +29,7 @@
       </ion-card>
     </div>
 
-    <div class="board">
+    <div class="board" [ngClass]="boardClass" [class.board-dim]="completed">
       <div
         class="tile"
         *ngFor="let c of cards"
@@ -37,12 +37,19 @@
         [class.matched]="c.matched"
         (click)="onCardTap(c)"
       >
-        <div class="face back" aria-hidden="true">♪</div>
-        <div class="face front">
-          <span class="ico">{{ c.icon }}</span>
-          <span class="lbl">{{ c.label }}</span>
+        <div class="tile-flip">
+          <div class="face back" aria-hidden="true">♪</div>
+          <div class="face front">
+            <span class="ico">{{ c.icon }}</span>
+            <span class="lbl">{{ c.label }}</span>
+          </div>
         </div>
       </div>
+    </div>
+
+    <div class="memory-done-banner" *ngIf="completed" role="status">
+      <ion-icon name="trophy" color="warning"></ion-icon>
+      <p>¡Completaste todas las parejas! Volviendo al inicio…</p>
     </div>
 
     <ion-card class="controls">
@@ -54,8 +61,8 @@
         </div>
       </div>
       <div class="btns">
-        <ion-button fill="outline" color="primary" (click)="restart()">Reiniciar</ion-button>
-        <ion-button color="secondary" (click)="togglePause()">
+        <ion-button fill="outline" color="primary" (click)="restart()" [disabled]="completed">Reiniciar</ion-button>
+        <ion-button color="secondary" (click)="togglePause()" [disabled]="completed">
           <ion-icon slot="start" [name]="paused ? 'play' : 'pause'"></ion-icon>
           {{ paused ? 'Continuar' : 'Pausar' }}
         </ion-button>

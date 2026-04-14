@@ -1,6 +1,23 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { StorageService } from '../../core/storage.service';
 import { STORAGE_KEYS } from '../../core/storage.keys';
+import { MEMORY_PAIR_BANK, MemoryPairDef } from './memory-pairs.data';
+
+const HOME_DELAY_MS = 2800;
+
+const DIFFICULTY_PAIRS: Record<string, number> = {
+  easy: 6,
+  medium: 12,
+  hard: 18,
+};
+
+/** Segundos de tiempo inicial según dificultad */
+const TIMER_SECONDS: Record<string, number> = {
+  easy: 120,
+  medium: 240,
+  hard: 420,
+};
 
 type Card = { id: number; key: string; label: string; icon: string; flipped: boolean; matched: boolean };
 
@@ -10,30 +27,65 @@ type Card = { id: number; key: string; label: string; icon: string; flipped: boo
   styleUrls: ['./memory.page.scss'],
   standalone: false,
 })
-export class MemoryPage {
+export class MemoryPage implements OnDestroy {
   pairsFound = 0;
-  readonly pairTotal = 8;
+  pairTotal = 8;
   points = 2450;
-  timeLabel = '01:45';
+  timeLabel = '00:00';
   paused = false;
+  completed = false;
+
+  /** Clases CSS para el tablero (densidad de columnas). */
+  boardClass: Record<string, boolean> = { 'board--easy': true };
 
   cards: Card[] = [];
   private first: Card | null = null;
   private lock = false;
   private timer: ReturnType<typeof setInterval> | null = null;
-  private seconds = 105;
+  private seconds = 120;
+  private homeTimer: ReturnType<typeof setTimeout> | null = null;
 
-  constructor(private readonly storage: StorageService) {}
+  constructor(
+    private readonly storage: StorageService,
+    private readonly router: Router,
+    private readonly route: ActivatedRoute,
+  ) {}
 
   ionViewWillEnter(): void {
+    const d = this.route.snapshot.queryParamMap.get('d');
+    const n = d ? DIFFICULTY_PAIRS[d] : 0;
+    if (!n) {
+      void this.router.navigate(['/memory'], { replaceUrl: true });
+      return;
+    }
+    if (n > MEMORY_PAIR_BANK.length) {
+      void this.router.navigate(['/memory'], { replaceUrl: true });
+      return;
+    }
+
+    this.pairTotal = n;
+    this.seconds = d && TIMER_SECONDS[d] ? TIMER_SECONDS[d] : 120;
+    this.boardClass = {
+      'board--easy': d === 'easy',
+      'board--medium': d === 'medium',
+      'board--hard': d === 'hard',
+    };
+
     void this.bootstrap();
   }
 
   ionViewWillLeave(): void {
     this.clearTimer();
+    this.clearHomeTimer();
+  }
+
+  ngOnDestroy(): void {
+    this.clearTimer();
+    this.clearHomeTimer();
   }
 
   private async bootstrap(): Promise<void> {
+    this.completed = false;
     const raw = await this.storage.get(STORAGE_KEYS.TOTAL_POINTS);
     if (raw != null) {
       const n = Number.parseInt(raw, 10);
@@ -46,10 +98,16 @@ export class MemoryPage {
   }
 
   private startTimer(): void {
+    if (this.completed) {
+      return;
+    }
     this.clearTimer();
-    this.seconds = 105;
     this.updateTimeLabel();
     this.timer = setInterval(() => {
+      if (this.completed) {
+        this.clearTimer();
+        return;
+      }
       if (this.paused) {
         return;
       }
@@ -69,6 +127,20 @@ export class MemoryPage {
     }
   }
 
+  private clearHomeTimer(): void {
+    if (this.homeTimer) {
+      clearTimeout(this.homeTimer);
+      this.homeTimer = null;
+    }
+  }
+
+  private goHomeAfterDelay(): void {
+    this.clearHomeTimer();
+    this.homeTimer = setTimeout(() => {
+      void this.router.navigateByUrl('/tabs/tab1', { replaceUrl: true });
+    }, HOME_DELAY_MS);
+  }
+
   private updateTimeLabel(): void {
     const m = Math.floor(this.seconds / 60);
     const s = this.seconds % 60;
@@ -76,20 +148,10 @@ export class MemoryPage {
   }
 
   private resetBoard(): void {
-    const pairDefs = [
-      { key: 'mangu', label: 'MANGÚ', icon: '🍽️' },
-      { key: 'guira', label: 'GÜIRA', icon: '🎵' },
-      { key: 'palma', label: 'PALMA', icon: '🌴' },
-      { key: 'tambora', label: 'TAMBORA', icon: '🥁' },
-      { key: 'playa', label: 'PLAYA', icon: '🏖️' },
-      { key: 'flor', label: 'FLOR', icon: '🌺' },
-      { key: 'chimi', label: 'CHIMI', icon: '🍔' },
-      { key: 'merengue', label: 'MERENGUE', icon: '💃' },
-    ];
-
+    const picked = this.pickRandomPairs(this.pairTotal);
     const deck: Card[] = [];
     let id = 0;
-    for (const p of pairDefs) {
+    for (const p of picked) {
       deck.push({ id: id++, ...p, flipped: false, matched: false });
       deck.push({ id: id++, ...p, flipped: false, matched: false });
     }
@@ -98,6 +160,13 @@ export class MemoryPage {
     this.pairsFound = 0;
     this.first = null;
     this.lock = false;
+  }
+
+  /** Elige `count` pares distintos al azar del banco. */
+  private pickRandomPairs(count: number): MemoryPairDef[] {
+    const copy = [...MEMORY_PAIR_BANK];
+    this.shuffle(copy);
+    return copy.slice(0, count);
   }
 
   private shuffle<T>(arr: T[]): void {
@@ -112,6 +181,10 @@ export class MemoryPage {
   }
 
   async restart(): Promise<void> {
+    this.completed = false;
+    this.clearHomeTimer();
+    const d = this.route.snapshot.queryParamMap.get('d');
+    this.seconds = d && TIMER_SECONDS[d] ? TIMER_SECONDS[d] : 120;
     this.resetBoard();
     this.startTimer();
     await this.storage.setJson(STORAGE_KEYS.MEMORY, { pairs: this.pairsFound });
@@ -140,6 +213,11 @@ export class MemoryPage {
       this.points += 120;
       await this.persistPoints();
       this.lock = false;
+      if (this.pairsFound >= this.pairTotal) {
+        this.completed = true;
+        this.clearTimer();
+        this.goHomeAfterDelay();
+      }
       return;
     }
     setTimeout(() => {
