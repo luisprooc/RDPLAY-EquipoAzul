@@ -23,40 +23,66 @@
       </div>
       <div class="scan-badge"><ion-icon name="trophy" aria-hidden="true"></ion-icon></div>
     </div>
-    <h2>Buscando Coro</h2>
+    <h2 class="lobby-title">Jugá con tus panas</h2>
     <p class="sub">
-      Escaneando jugadores de RDPlay a tu alrededor para armar la chercha…
+      Armá una partida vos o unite a la de alguien más. Si tenés Bluetooth encendido, también podés ver quién está cerca.
     </p>
 
-    <ion-card class="lobby-card">
-      <div class="row">
-        <div class="bubble blue"><ion-icon name="add" aria-hidden="true"></ion-icon></div>
-        <div>
-          <h3>Crear Sala</h3>
-          <p>Sé el anfitrión y elige el juego: ¿Dominó o Trivia?</p>
+    <div class="lobby-actions">
+      <ion-card class="lobby-card">
+        <div class="lobby-card-body">
+          <div class="row">
+            <div class="bubble blue" aria-hidden="true"><ion-icon name="add"></ion-icon></div>
+            <div class="row-text">
+              <h3>Crear sala</h3>
+              <p>Vos elegís el juego: trivia, memoria o secuencia. Después compartís el código con tu gente.</p>
+            </div>
+          </div>
+          <ion-button class="lobby-card-btn" expand="block" color="secondary" shape="round" (click)="openCreateRoom()">
+            Empezar partida
+          </ion-button>
         </div>
-      </div>
-      <ion-button expand="block" color="secondary" (click)="openCreateRoom()">Empezar partida</ion-button>
-    </ion-card>
+      </ion-card>
 
-    <ion-card class="lobby-card">
-      <div class="row">
-        <div class="bubble yellow"><ion-icon name="people" aria-hidden="true"></ion-icon></div>
-        <div>
-          <h3>Unirse</h3>
-          <p>Entra a una sala activa y demuestra quién es el tiguere.</p>
+      <ion-card class="lobby-card">
+        <div class="lobby-card-body">
+          <div class="row">
+            <div class="bubble yellow" aria-hidden="true"><ion-icon name="people"></ion-icon></div>
+            <div class="row-text">
+              <h3>Unirte a una sala</h3>
+              <p>Pedile el código de 6 números al que creó la sala y metete en la chercha.</p>
+            </div>
+          </div>
+          <ion-button class="lobby-card-btn" expand="block" color="primary" shape="round" (click)="openJoinWithCode()">
+            Entrar con código
+            <ion-badge *ngIf="rooms.length > 0" slot="end" color="danger">{{ rooms.length }}</ion-badge>
+          </ion-button>
         </div>
-      </div>
-      <ion-button expand="block" color="primary">
-        Buscar sala
-        <ion-badge *ngIf="rooms.length > 0" slot="end" color="danger">{{ rooms.length }}</ion-badge>
-      </ion-button>
-    </ion-card>
+      </ion-card>
+    </div>
 
-    <!-- Jugadores cercanos -->
+    <div class="nearby-head ble-head">
+      <h3>Cerca con Bluetooth</h3>
+      <span class="live" *ngIf="bleDevices.length">{{ bleDevices.length }} encontrados</span>
+    </div>
+    <p class="ble-hint" *ngIf="bleStatusMessage">{{ bleStatusMessage }}</p>
+    <ion-card class="player-card ble-device-card" *ngFor="let d of bleDevices">
+      <ion-item lines="none" button detail="false" (click)="onBleDeviceTap(d)">
+        <ion-icon name="bluetooth" slot="start" color="primary" aria-hidden="true"></ion-icon>
+        <ion-label>
+          <h2>{{ d.name }}</h2>
+          <p>Tocá acá para ver cómo invitarlos a tu partida.</p>
+        </ion-label>
+      </ion-item>
+    </ion-card>
+    <div class="hint-card" *ngIf="!bleDevices.length && !bleStatusMessage">
+      <ion-icon name="bluetooth-outline" aria-hidden="true"></ion-icon>
+      <p>Buscando aparatos cerca… Asegurate de tener el Bluetooth prendido y el otro teléfono también.</p>
+    </div>
+
     <div class="nearby-head">
-      <h3>Jugadores cercanos</h3>
-      <span class="live">• EN VIVO</span>
+      <h3>Jugadores conectados</h3>
+      <span class="live">En vivo</span>
     </div>
 
     <ng-container *ngIf="scanning">
@@ -82,7 +108,7 @@
           </ion-avatar>
           <ion-label>
             <h2>{{ p.name }}</h2>
-            <p>Nivel {{ p.level }} • Cerca de ti</p>
+            <p>Nivel {{ p.level }} · También en el lobby</p>
           </ion-label>
           <ion-button slot="end" fill="outline" size="small" (click)="invitePlayer(p)">Invitar</ion-button>
         </ion-item>
@@ -109,9 +135,10 @@
           <ion-label>
             <h2>{{ r.hostName }}</h2>
             <p>{{ gameLabel(r.game) }} • {{ r.playerCount }}/{{ r.maxPlayers }} jugadores</p>
+            <p class="room-status-hint" *ngIf="r.status === 'in-progress'">Partida en curso · podés volver a la sala</p>
           </ion-label>
           <ion-button slot="end" fill="solid" color="primary" size="small" (click)="joinRoom(r)">
-            Unirse
+            {{ r.status === 'in-progress' ? 'Volver' : 'Unirse' }}
           </ion-button>
         </ion-item>
       </ion-card>

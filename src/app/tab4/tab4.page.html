@@ -15,7 +15,7 @@
     <ion-card class="hero">
       <ion-card-header>
         <ion-card-title>Hola, {{ displayName }}</ion-card-title>
-        <ion-card-subtitle>Tu puntaje total se guarda en el dispositivo (Hito 2).</ion-card-subtitle>
+        <ion-card-subtitle>Tus puntos se guardan solo en este teléfono o tableta; nadie más los ve.</ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
         <div class="big-points">{{ totalPoints | number }} pts</div>
@@ -35,7 +35,7 @@
             (ionBlur)="saveName(displayName)"
           ></ion-input>
         </ion-item>
-        <p class="hint">Se guarda con Capacitor Preferences (@capacitor/preferences).</p>
+        <p class="hint">Así te saludamos en Inicio y en el lobby. Podés cambiarlo cuando quieras.</p>
       </ion-card-content>
     </ion-card>
   </div>

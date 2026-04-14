@@ -22,6 +22,10 @@ const routes: Routes = [
   path: 'ranking',
   loadChildren: () => import('./pages/ranking/ranking.module').then(m => m.RankingPageModule)
   },
+  {
+    path: 'bt-room/:roomId',
+    loadChildren: () => import('./pages/bt-room/bt-room.module').then((m) => m.BtRoomPageModule),
+  },
 ];
 @NgModule({
   imports: [

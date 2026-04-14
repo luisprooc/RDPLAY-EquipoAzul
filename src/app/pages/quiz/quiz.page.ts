@@ -2,6 +2,7 @@ import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { StorageService } from '../../core/storage.service';
 import { STORAGE_KEYS } from '../../core/storage.keys';
+import { LobbyService } from '../../core/lobby.service';
 import { QuizQuestion } from './quiz-question.model';
 import { QUIZ_QUESTION_BANK } from './quiz-questions.data';
 import { pickRandomQuestions } from './quiz-utils';
@@ -37,13 +38,18 @@ export class QuizPage implements OnDestroy {
     private readonly storage: StorageService,
     private readonly router: Router,
     private readonly route: ActivatedRoute,
+    private readonly lobby: LobbyService,
   ) {}
 
   ionViewWillEnter(): void {
     const d = this.route.snapshot.queryParamMap.get('d');
+    const room = this.route.snapshot.queryParamMap.get('room');
     const total = d ? DIFFICULTY_COUNTS[d] : 0;
     if (!total) {
-      void this.router.navigate(['/quiz'], { replaceUrl: true });
+      void this.router.navigate(['/quiz'], {
+        queryParams: room ? { room } : {},
+        replaceUrl: true,
+      });
       return;
     }
 
@@ -54,7 +60,10 @@ export class QuizPage implements OnDestroy {
     this.revealed = false;
     this.questions = pickRandomQuestions(QUIZ_QUESTION_BANK, total);
     if (this.questions.length === 0) {
-      void this.router.navigate(['/quiz'], { replaceUrl: true });
+      void this.router.navigate(['/quiz'], {
+        queryParams: room ? { room } : {},
+        replaceUrl: true,
+      });
       return;
     }
     this.startQuestion();
@@ -131,8 +140,22 @@ export class QuizPage implements OnDestroy {
   private goHomeAfterDelay(): void {
     this.clearHomeTimer();
     this.homeTimer = setTimeout(() => {
-      void this.router.navigateByUrl('/tabs/tab1', { replaceUrl: true });
+      void this.afterRoundFinished();
     }, HOME_DELAY_MS);
+  }
+
+  private async afterRoundFinished(): Promise<void> {
+    const roomId = this.route.snapshot.queryParamMap.get('room');
+    if (roomId) {
+      try {
+        await this.lobby.reportPlayerFinishedRound(roomId);
+      } catch {
+        /* sin red o sala ya cerrada */
+      }
+      await this.router.navigate(['/bt-room', roomId], { replaceUrl: true });
+      return;
+    }
+    await this.router.navigateByUrl('/tabs/tab1', { replaceUrl: true });
   }
 
   async onPick(optionIndex: number | null): Promise<void> {

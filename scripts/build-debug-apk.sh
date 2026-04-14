@@ -3,7 +3,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-# Capacitor 8 compila con Java 21; Java 17 provoca: invalid source release: 21
+# Opcional: forzar JDK 21 si lo tenés (el proyecto también compila con JDK 17 vía android/build.gradle)
 if [[ -z "${JAVA_HOME:-}" ]]; then
   HB21="/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home"
   if [[ -x "$HB21/bin/java" ]]; then
@@ -28,5 +28,6 @@ if [[ ! -f "$OUT" ]]; then
   exit 1
 fi
 
-cp -f "$OUT" "$ROOT/hito2-app-debug.apk"
-echo "Listo: $ROOT/hito2-app-debug.apk"
+mkdir -p "$ROOT/apk"
+cp -f "$OUT" "$ROOT/apk/hito3-app-debug.apk"
+echo "Listo: $ROOT/apk/hito3-app-debug.apk"

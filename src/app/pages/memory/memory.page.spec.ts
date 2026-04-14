@@ -3,6 +3,7 @@ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MemoryPage } from './memory.page';
 import { StorageService } from '../../core/storage.service';
+import { LobbyService } from '../../core/lobby.service';
 
 describe('MemoryPage', () => {
   let component: MemoryPage;
@@ -23,7 +24,13 @@ describe('MemoryPage', () => {
             },
           },
         },
-        { provide: Router, useValue: { navigate: jasmine.createSpy('navigate') } },
+        {
+          provide: Router,
+          useValue: {
+            navigate: jasmine.createSpy('navigate'),
+            navigateByUrl: jasmine.createSpy('navigateByUrl'),
+          },
+        },
         {
           provide: StorageService,
           useValue: {
@@ -32,6 +39,7 @@ describe('MemoryPage', () => {
             setJson: () => Promise.resolve(),
           },
         },
+        { provide: LobbyService, useValue: { reportPlayerFinishedRound: () => Promise.resolve() } },
       ],
     });
     fixture = TestBed.createComponent(MemoryPage);

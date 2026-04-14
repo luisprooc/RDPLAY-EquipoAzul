@@ -1,0 +1,86 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/tab2" text="Lobby"></ion-back-button>
+    </ion-buttons>
+    <ion-title class="rd-brand">Sala multijugador</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding rd-page">
+  <div *ngIf="loading" class="ion-text-center ion-padding">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando sala…</p>
+  </div>
+
+  <ng-container *ngIf="!loading && room">
+    <ion-card *ngIf="room.status === 'waiting' && !isMember" color="tertiary">
+      <ion-card-content>
+        <p>No estás en esta sala todavía.</p>
+        <ion-button expand="block" (click)="joinThisRoom()">Unirme a la sala</ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Anfitrión: {{ room.hostName }}</ion-card-title>
+        <ion-card-subtitle>Juego elegido: {{ room.game === 'quiz' ? 'Trivia' : room.game === 'memory' ? 'Memoria' : 'Secuencia' }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <p class="code-label">Código para unirse (comparte por voz, mensaje o Bluetooth cercano)</p>
+        <div class="code-row">
+          <span class="code">{{ room.joinCode }}</span>
+          <ion-button size="small" fill="outline" (click)="copyCode()">
+            <ion-icon slot="start" name="copy-outline"></ion-icon>
+            Copiar
+          </ion-button>
+        </div>
+        <p class="players-hint">{{ room.playerCount }} / {{ room.maxPlayers }} jugadores</p>
+        <ul class="member-list" *ngIf="room.memberNames?.length">
+          <li *ngFor="let n of room.memberNames">{{ n }}</li>
+        </ul>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="room.status === 'waiting' && isHost">
+      <ion-card-content>
+        <p>Cuando todos estén listos, tocá abajo para empezar con el juego que elegiste al crear la sala.</p>
+        <ion-button expand="block" color="secondary" (click)="hostStartGame()">
+          <ion-icon slot="start" name="play-circle-outline"></ion-icon>
+          Lanzar partida
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="room.status === 'waiting' && !isHost">
+      <ion-card-content>
+        <p>Espera a que el anfitrión inicie. Mientras tanto puedes compartir el código con otro panas.</p>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="room.status === 'in-progress' && room.startedGame" color="light">
+      <ion-card-content>
+        <p><strong>¡La partida empezó!</strong></p>
+        <p class="room-progress" *ngIf="totalMembers > 0">
+          {{ finishedPlayingCount }} de {{ totalMembers }} jugadores ya terminaron. La sala sigue hasta que
+          todos cierren su partida.
+        </p>
+        <ion-button expand="block" color="primary" (click)="enterGameFromLobby()">
+          Entrar al juego
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="isHost" color="danger" class="close-room-card">
+      <ion-card-content>
+        <p class="close-room-hint">Como anfitrión podés terminar la sala para todos.</p>
+        <ion-button expand="block" fill="outline" color="light" (click)="confirmCloseRoom()">
+          <ion-icon slot="start" name="close-circle-outline"></ion-icon>
+          Cerrar sala
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </ng-container>
+
+  <ion-button expand="block" fill="clear" (click)="goLobby()">Volver al lobby</ion-button>
+</ion-content>

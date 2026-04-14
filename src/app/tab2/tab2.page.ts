@@ -1,7 +1,9 @@
 import { Component, OnDestroy } from '@angular/core';
-import { ActionSheetController, ToastController } from '@ionic/angular';
+import { Router } from '@angular/router';
+import { ActionSheetController, AlertController, ToastController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
-import { LobbyService, LobbyPlayer, LobbyRoom } from '../core/lobby.service';
+import { BtLeService, BleDeviceDisplay } from '../core/bt-le.service';
+import { LobbyPlayer, LobbyRoom, LobbyService } from '../core/lobby.service';
 
 @Component({
   selector: 'app-tab2',
@@ -13,25 +15,40 @@ export class Tab2Page implements OnDestroy {
   scanning = false;
   players: LobbyPlayer[] = [];
   rooms: LobbyRoom[] = [];
+  bleDevices: BleDeviceDisplay[] = [];
+  bleStatusMessage = '';
 
   private subs: Subscription[] = [];
 
   constructor(
     private lobby: LobbyService,
+    private btLe: BtLeService,
     private actionSheet: ActionSheetController,
+    private alertCtrl: AlertController,
     private toast: ToastController,
+    private router: Router,
   ) {}
 
   async ionViewWillEnter(): Promise<void> {
     this.scanning = true;
+    this.bleStatusMessage = this.btLe.statusMessage;
     try {
+      await this.btLe.initialize();
+      this.bleStatusMessage = this.btLe.statusMessage;
+      void this.btLe.startScan();
+      this.subs.push(
+        this.btLe.scanResults$.subscribe((list) => {
+          this.bleDevices = list;
+        }),
+      );
+
       await this.lobby.registerPlayer();
       this.subs.push(
-        this.lobby.watchNearbyPlayers().subscribe(p => {
+        this.lobby.watchNearbyPlayers().subscribe((p) => {
           this.players = p;
           this.scanning = false;
         }),
-        this.lobby.watchRooms().subscribe(r => (this.rooms = r)),
+        this.lobby.watchRooms().subscribe((r) => (this.rooms = r)),
       );
     } catch (err) {
       console.error('Lobby error:', err);
@@ -40,13 +57,14 @@ export class Tab2Page implements OnDestroy {
   }
 
   async ionViewWillLeave(): Promise<void> {
-    this.subs.forEach(s => s.unsubscribe());
+    this.subs.forEach((s) => s.unsubscribe());
     this.subs = [];
-    await this.lobby.unregisterPlayer();
+    await this.btLe.stopScan();
+    /* No unregisterPlayer aquí: al ir a /bt-room el jugador debe seguir en Firestore para unirse a la sala. */
   }
 
   ngOnDestroy(): void {
-    this.subs.forEach(s => s.unsubscribe());
+    this.subs.forEach((s) => s.unsubscribe());
   }
 
   async openCreateRoom(): Promise<void> {
@@ -61,28 +79,116 @@ export class Tab2Page implements OnDestroy {
     });
     await sheet.present();
     const { data } = await sheet.onDidDismiss<'quiz' | 'memory' | 'sequence'>();
-    if (!data) return;
+    if (!data) {
+      return;
+    }
     try {
-      await this.lobby.createRoom(data);
-      await this.showToast('Sala creada. ¡Esperando jugadores…');
+      const roomId = await this.lobby.createRoom(data);
+      await this.showToast('Sala creada. Comparte el código con tus panas.');
+      await this.router.navigate(['/bt-room', roomId]);
     } catch {
-      await this.showToast('Error al crear sala. Intenta de nuevo.', 'danger');
+      await this.showToast('No se pudo crear la sala. Revisá tu conexión e intentá otra vez.', 'danger');
+    }
+  }
+
+  async openJoinWithCode(): Promise<void> {
+    const code = await this.promptRoomCode({
+      header: 'Unirse por código',
+      message: 'Pedile al que armó la sala los 6 números del código.',
+      confirmText: 'Unirse',
+    });
+    if (!code) {
+      return;
+    }
+    try {
+      const roomId = await this.lobby.joinRoomByJoinCode(code);
+      await this.router.navigate(['/bt-room', roomId]);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'No se pudo unir';
+      await this.showToast(msg, 'danger');
     }
   }
 
   async joinRoom(room: LobbyRoom): Promise<void> {
-    // TODO: navigate to game page with roomId once game screens exist
-    await this.showToast(`Uniéndote a sala de ${room.hostName}…`);
+    try {
+      await this.lobby.joinRoom(room.id);
+      await this.router.navigate(['/bt-room', room.id]);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Error al unirse';
+      await this.showToast(msg, 'danger');
+    }
   }
 
   async invitePlayer(player: LobbyPlayer): Promise<void> {
-    // TODO: send invite notification via Firestore
-    await this.showToast(`Invitación enviada a ${player.name}`);
+    const code = await this.promptRoomCode({
+      header: `Invitar a ${player.name}`,
+      message:
+        'Pegá el código de 6 dígitos de la sala que ya creaste. Tenés que ser el anfitrión de esa sala para agregar a esta persona.',
+      confirmText: 'Agregar a la sala',
+    });
+    if (!code) {
+      return;
+    }
+    try {
+      const result = await this.lobby.hostInvitePlayerByJoinCode(code, player.id);
+      await this.showToast(
+        result === 'already'
+          ? `${player.name} ya estaba en la sala`
+          : `${player.name} quedó en la sala`,
+      );
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'No se pudo invitar';
+      await this.showToast(msg, 'danger');
+    }
+  }
+
+  /** Devuelve el código de 6 dígitos o `null` si cancela o el formato es inválido. */
+  private async promptRoomCode(opts: {
+    header: string;
+    message: string;
+    confirmText: string;
+  }): Promise<string | null> {
+    const alert = await this.alertCtrl.create({
+      header: opts.header,
+      message: opts.message,
+      inputs: [
+        {
+          name: 'joincode',
+          type: 'text',
+          placeholder: '000000',
+          attributes: { maxlength: 6, inputmode: 'numeric' },
+        },
+      ],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        { text: opts.confirmText, role: 'confirm' },
+      ],
+    });
+    await alert.present();
+    const { role, data } = await alert.onDidDismiss<{ values?: { joincode?: string } }>();
+    if (role !== 'confirm') {
+      return null;
+    }
+    const raw = data?.values?.joincode ?? '';
+    const code = String(raw).replace(/\D/g, '').slice(0, 6);
+    if (code.length !== 6) {
+      await this.showToast('Ingresá 6 dígitos', 'warning');
+      return null;
+    }
+    return code;
+  }
+
+  async onBleDeviceTap(device: BleDeviceDisplay): Promise<void> {
+    await this.showToast(
+      `Para jugar con ${device.name}, creá una sala y pasales el código por WhatsApp o de viva voz.`,
+      'medium',
+    );
   }
 
   async onRefresh(ev: CustomEvent): Promise<void> {
-    this.subs.forEach(s => s.unsubscribe());
+    this.subs.forEach((s) => s.unsubscribe());
     this.subs = [];
+    await this.btLe.stopScan();
     await this.lobby.unregisterPlayer();
     await this.ionViewWillEnter();
     (ev.target as HTMLIonRefresherElement).complete();
