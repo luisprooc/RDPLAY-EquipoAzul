@@ -18,6 +18,10 @@ const routes: Routes = [
     path: 'sequence',
     loadChildren: () => import('./pages/sequence/sequence.module').then( m => m.SequencePageModule)
   }
+  {
+  path: 'ranking',
+  loadChildren: () => import('./pages/ranking/ranking.module').then(m => m.RankingPageModule)
+  },
 ];
 @NgModule({
   imports: [
