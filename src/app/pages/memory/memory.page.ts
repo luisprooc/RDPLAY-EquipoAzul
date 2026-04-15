@@ -2,7 +2,9 @@ import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { StorageService } from '../../core/storage.service';
 import { STORAGE_KEYS } from '../../core/storage.keys';
+import { BleSessionService } from '../../core/ble-session.service';
 import { LobbyService } from '../../core/lobby.service';
+import { RankingService } from '../../core/ranking.service';
 import { MEMORY_PAIR_BANK, MemoryPairDef } from './memory-pairs.data';
 
 const HOME_DELAY_MS = 2800;
@@ -51,22 +53,37 @@ export class MemoryPage implements OnDestroy {
     private readonly router: Router,
     private readonly route: ActivatedRoute,
     private readonly lobby: LobbyService,
+    private readonly bleSession: BleSessionService,
+    private readonly ranking: RankingService,
   ) {}
+
+  private roomBleQueryParams(): Record<string, string> {
+    const m = this.route.snapshot.queryParamMap;
+    const out: Record<string, string> = {};
+    const room = m.get('room');
+    const ble = m.get('ble');
+    if (room) {
+      out['room'] = room;
+    }
+    if (ble) {
+      out['ble'] = ble;
+    }
+    return out;
+  }
 
   ionViewWillEnter(): void {
     const d = this.route.snapshot.queryParamMap.get('d');
-    const room = this.route.snapshot.queryParamMap.get('room');
     const n = d ? DIFFICULTY_PAIRS[d] : 0;
     if (!n) {
       void this.router.navigate(['/memory'], {
-        queryParams: room ? { room } : {},
+        queryParams: this.roomBleQueryParams(),
         replaceUrl: true,
       });
       return;
     }
     if (n > MEMORY_PAIR_BANK.length) {
       void this.router.navigate(['/memory'], {
-        queryParams: room ? { room } : {},
+        queryParams: this.roomBleQueryParams(),
         replaceUrl: true,
       });
       return;
@@ -151,14 +168,23 @@ export class MemoryPage implements OnDestroy {
   }
 
   private async afterRoundFinished(): Promise<void> {
-    const roomId = this.route.snapshot.queryParamMap.get('room');
+    const m = this.route.snapshot.queryParamMap;
+    const roomId = m.get('room');
+    const isBle = m.get('ble') === '1';
     if (roomId) {
       try {
-        await this.lobby.reportPlayerFinishedRound(roomId);
+        const pid = this.lobby.currentPlayerId;
+        if (pid) {
+          if (isBle) {
+            await this.bleSession.reportPlayerFinishedRound(roomId, pid);
+          } else {
+            await this.lobby.reportPlayerFinishedRound(roomId);
+          }
+        }
       } catch {
         /* ignore */
       }
-      await this.router.navigate(['/bt-room', roomId], { replaceUrl: true });
+      await this.router.navigate(isBle ? ['/ble-room', roomId] : ['/bt-room', roomId], { replaceUrl: true });
       return;
     }
     await this.router.navigateByUrl('/tabs/tab1', { replaceUrl: true });
@@ -253,5 +279,6 @@ export class MemoryPage implements OnDestroy {
   private async persistPoints(): Promise<void> {
     await this.storage.set(STORAGE_KEYS.TOTAL_POINTS, String(this.points));
     await this.storage.setJson(STORAGE_KEYS.MEMORY, { pairs: this.pairsFound, at: Date.now() });
+    void this.ranking.syncMyEntry();
   }
 }

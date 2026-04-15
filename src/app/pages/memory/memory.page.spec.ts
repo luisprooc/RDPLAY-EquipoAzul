@@ -4,6 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MemoryPage } from './memory.page';
 import { StorageService } from '../../core/storage.service';
 import { LobbyService } from '../../core/lobby.service';
+import { RankingService } from '../../core/ranking.service';
+import { BleSessionService } from '../../core/ble-session.service';
 
 describe('MemoryPage', () => {
   let component: MemoryPage;
@@ -40,6 +42,8 @@ describe('MemoryPage', () => {
           },
         },
         { provide: LobbyService, useValue: { reportPlayerFinishedRound: () => Promise.resolve() } },
+        { provide: RankingService, useValue: { syncMyEntry: () => Promise.resolve() } },
+        { provide: BleSessionService, useValue: { reportPlayerFinishedRound: () => Promise.resolve() } },
       ],
     });
     fixture = TestBed.createComponent(MemoryPage);

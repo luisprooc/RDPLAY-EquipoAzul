@@ -2,7 +2,9 @@ import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { StorageService } from '../../core/storage.service';
 import { STORAGE_KEYS } from '../../core/storage.keys';
+import { BleSessionService } from '../../core/ble-session.service';
 import { LobbyService } from '../../core/lobby.service';
+import { RankingService } from '../../core/ranking.service';
 import { QuizQuestion } from './quiz-question.model';
 import { QUIZ_QUESTION_BANK } from './quiz-questions.data';
 import { pickRandomQuestions } from './quiz-utils';
@@ -39,15 +41,30 @@ export class QuizPage implements OnDestroy {
     private readonly router: Router,
     private readonly route: ActivatedRoute,
     private readonly lobby: LobbyService,
+    private readonly bleSession: BleSessionService,
+    private readonly ranking: RankingService,
   ) {}
+
+  private roomBleQueryParams(): Record<string, string> {
+    const m = this.route.snapshot.queryParamMap;
+    const out: Record<string, string> = {};
+    const room = m.get('room');
+    const ble = m.get('ble');
+    if (room) {
+      out['room'] = room;
+    }
+    if (ble) {
+      out['ble'] = ble;
+    }
+    return out;
+  }
 
   ionViewWillEnter(): void {
     const d = this.route.snapshot.queryParamMap.get('d');
-    const room = this.route.snapshot.queryParamMap.get('room');
     const total = d ? DIFFICULTY_COUNTS[d] : 0;
     if (!total) {
       void this.router.navigate(['/quiz'], {
-        queryParams: room ? { room } : {},
+        queryParams: this.roomBleQueryParams(),
         replaceUrl: true,
       });
       return;
@@ -61,7 +78,7 @@ export class QuizPage implements OnDestroy {
     this.questions = pickRandomQuestions(QUIZ_QUESTION_BANK, total);
     if (this.questions.length === 0) {
       void this.router.navigate(['/quiz'], {
-        queryParams: room ? { room } : {},
+        queryParams: this.roomBleQueryParams(),
         replaceUrl: true,
       });
       return;
@@ -101,6 +118,7 @@ export class QuizPage implements OnDestroy {
     const raw = await this.storage.get(STORAGE_KEYS.TOTAL_POINTS);
     const prev = raw != null ? Number.parseInt(raw, 10) || 0 : 0;
     await this.storage.set(STORAGE_KEYS.TOTAL_POINTS, String(prev + points));
+    void this.ranking.syncMyEntry();
   }
 
   private startQuestion(): void {
@@ -145,14 +163,23 @@ export class QuizPage implements OnDestroy {
   }
 
   private async afterRoundFinished(): Promise<void> {
-    const roomId = this.route.snapshot.queryParamMap.get('room');
+    const m = this.route.snapshot.queryParamMap;
+    const roomId = m.get('room');
+    const isBle = m.get('ble') === '1';
     if (roomId) {
       try {
-        await this.lobby.reportPlayerFinishedRound(roomId);
+        const pid = this.lobby.currentPlayerId;
+        if (pid) {
+          if (isBle) {
+            await this.bleSession.reportPlayerFinishedRound(roomId, pid);
+          } else {
+            await this.lobby.reportPlayerFinishedRound(roomId);
+          }
+        }
       } catch {
         /* sin red o sala ya cerrada */
       }
-      await this.router.navigate(['/bt-room', roomId], { replaceUrl: true });
+      await this.router.navigate(isBle ? ['/ble-room', roomId] : ['/bt-room', roomId], { replaceUrl: true });
       return;
     }
     await this.router.navigateByUrl('/tabs/tab1', { replaceUrl: true });

@@ -17,6 +17,18 @@
   line-height: 1.35;
 }
 
+.ble-section-lede {
+  font-size: 0.9rem;
+  color: #555;
+  text-align: left;
+  line-height: 1.4;
+  margin: 0 0 12px;
+}
+
+.ble-join-btn {
+  margin-bottom: 12px;
+}
+
 .scan-wrap {
   position: relative;
   width: min(200px, 52vw);

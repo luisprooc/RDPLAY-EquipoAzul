@@ -2,7 +2,9 @@ import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { StorageService } from '../../core/storage.service';
 import { STORAGE_KEYS } from '../../core/storage.keys';
+import { BleSessionService } from '../../core/ble-session.service';
 import { LobbyService } from '../../core/lobby.service';
+import { RankingService } from '../../core/ranking.service';
 import {
   SEQUENCE_SCENARIOS,
   SequenceScenarioDef,
@@ -40,6 +42,8 @@ export class SequencePage implements OnDestroy {
     private readonly router: Router,
     private readonly route: ActivatedRoute,
     private readonly lobby: LobbyService,
+    private readonly bleSession: BleSessionService,
+    private readonly ranking: RankingService,
   ) {
     this.applyScenario(SEQUENCE_SCENARIOS[Math.floor(Math.random() * SEQUENCE_SCENARIOS.length)]);
   }
@@ -90,14 +94,23 @@ export class SequencePage implements OnDestroy {
   }
 
   private async afterRoundFinished(): Promise<void> {
-    const roomId = this.route.snapshot.queryParamMap.get('room');
+    const m = this.route.snapshot.queryParamMap;
+    const roomId = m.get('room');
+    const isBle = m.get('ble') === '1';
     if (roomId) {
       try {
-        await this.lobby.reportPlayerFinishedRound(roomId);
+        const pid = this.lobby.currentPlayerId;
+        if (pid) {
+          if (isBle) {
+            await this.bleSession.reportPlayerFinishedRound(roomId, pid);
+          } else {
+            await this.lobby.reportPlayerFinishedRound(roomId);
+          }
+        }
       } catch {
         /* ignore */
       }
-      await this.router.navigate(['/bt-room', roomId], { replaceUrl: true });
+      await this.router.navigate(isBle ? ['/ble-room', roomId] : ['/bt-room', roomId], { replaceUrl: true });
       return;
     }
     await this.router.navigateByUrl('/tabs/tab1', { replaceUrl: true });
@@ -208,6 +221,7 @@ export class SequencePage implements OnDestroy {
       const prev = raw != null ? Number.parseInt(raw, 10) || 0 : 0;
       await this.storage.set(STORAGE_KEYS.TOTAL_POINTS, String(prev + this.bonusPoints));
       await this.storage.set(STORAGE_KEYS.ACHIEVEMENTS, '9');
+      void this.ranking.syncMyEntry();
       this.goHomeAfterDelay();
     }
   }

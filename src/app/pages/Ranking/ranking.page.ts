@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { RankingService, RankingEntry } from '../../core/ranking.service';
+import { LeaderboardEntry, RankingService } from '../../core/ranking.service';
 import { StorageService } from '../../core/storage.service';
+import { STORAGE_KEYS } from '../../core/storage.keys';
 
 @Component({
   selector: 'app-ranking',
@@ -9,41 +10,52 @@ import { StorageService } from '../../core/storage.service';
   standalone: false,
 })
 export class RankingPage implements OnInit {
-  scores: RankingEntry[] = [];
-  selectedGame: string = 'all';
+  entries: LeaderboardEntry[] = [];
   isLoading = true;
-  playerName = '';
-
-  games = [
-    { value: 'all',      label: '🏆 Global'   },
-    { value: 'quiz',     label: '❓ Quiz'      },
-    { value: 'memory',   label: '🧠 Memoria'   },
-    { value: 'sequence', label: '☕ Secuencia'  },
-  ];
+  myDisplayName = '';
+  myTotalPoints = 0;
 
   constructor(
     private rankingService: RankingService,
-    private storage: StorageService
+    private storage: StorageService,
   ) {}
 
-  async ngOnInit() {
-    this.playerName = await this.storage.get('playerName') ?? 'Jugador';
+  async ngOnInit(): Promise<void> {
+    await this.loadLocalSummary();
     await this.load();
   }
 
-  async load() {
-    this.isLoading = true;
-    const game = this.selectedGame === 'all' ? undefined : this.selectedGame;
-    this.scores = await this.rankingService.getTopScores(game);
-    this.isLoading = false;
+  private async loadLocalSummary(): Promise<void> {
+    this.myDisplayName = (await this.storage.get(STORAGE_KEYS.DISPLAY_NAME))?.trim() || 'Jugador';
+    const raw = await this.storage.get(STORAGE_KEYS.TOTAL_POINTS);
+    this.myTotalPoints = raw != null ? Number.parseInt(raw, 10) || 0 : 0;
   }
 
-  onGameChange(event: any) {
-    this.selectedGame = event.detail.value;
-    this.load();
+  async load(): Promise<void> {
+    this.isLoading = true;
+    await this.rankingService.syncMyEntry();
+    await this.loadLocalSummary();
+    this.entries = await this.rankingService.getGlobalLeaderboard(50);
+    this.isLoading = false;
   }
 
   getMedal(index: number): string {
     return ['🥇', '🥈', '🥉'][index] ?? `${index + 1}.`;
+  }
+
+  /** Fecha amigable bajo el nombre en la lista. */
+  updatedLabel(entry: LeaderboardEntry): string {
+    const u = entry.updatedAt as { toDate?: () => Date } | undefined;
+    if (u && typeof u.toDate === 'function') {
+      const d = u.toDate();
+      return `Última vez: ${d.toLocaleString('es-DO', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })}`;
+    }
+    return '';
   }
 }

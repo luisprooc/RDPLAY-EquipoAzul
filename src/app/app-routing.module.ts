@@ -26,6 +26,10 @@ const routes: Routes = [
     path: 'bt-room/:roomId',
     loadChildren: () => import('./pages/bt-room/bt-room.module').then((m) => m.BtRoomPageModule),
   },
+  {
+    path: 'ble-room/:sessionId',
+    loadChildren: () => import('./pages/ble-room/ble-room.module').then((m) => m.BleRoomPageModule),
+  },
 ];
 @NgModule({
   imports: [

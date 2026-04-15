@@ -1,0 +1,94 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/tab2" text="Lobby"></ion-back-button>
+    </ion-buttons>
+    <ion-title class="rd-brand">Partida Bluetooth</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding rd-page">
+  <p class="ble-room-note">
+    Esta partida es solo entre vos y la persona que se unió con el código. No aparece en las salas online del
+    lobby.
+  </p>
+
+  <div *ngIf="loading" class="ion-text-center ion-padding">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando…</p>
+  </div>
+
+  <ng-container *ngIf="!loading && session">
+    <ion-card *ngIf="isHost">
+      <ion-card-header>
+        <ion-card-title>Vos invitás</ion-card-title>
+        <ion-card-subtitle
+          >Reto: {{ session.game === 'quiz' ? 'Trivia' : session.game === 'memory' ? 'Memoria' : 'Secuencia' }}
+        </ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <p class="code-label">Pasale este código a tu amigo (en voz o de cerca)</p>
+        <div class="code-row">
+          <span class="code">{{ session.inviteCode }}</span>
+          <ion-button size="small" fill="outline" (click)="copyCode()">
+            <ion-icon slot="start" name="copy-outline"></ion-icon>
+            Copiar
+          </ion-button>
+        </div>
+        <p class="players-hint" *ngIf="session.guestName">
+          Ya entró: <strong>{{ session.guestName }}</strong>
+        </p>
+        <p class="players-hint waiting-guest" *ngIf="!session.guestId">Esperando que ingrese el código en Lobby → “Unirte por Bluetooth”…</p>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="isGuest">
+      <ion-card-header>
+        <ion-card-title>Partida con {{ session.hostName }}</ion-card-title>
+        <ion-card-subtitle
+          >Reto: {{ session.game === 'quiz' ? 'Trivia' : session.game === 'memory' ? 'Memoria' : 'Secuencia' }}
+        </ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <p *ngIf="session.status === 'waiting'">Cuando {{ session.hostName }} pulse empezar, vas a poder jugar.</p>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="session.status === 'waiting' && isHost && session.guestId" color="light">
+      <ion-card-content>
+        <p>Cuando quieran empezar, tocá abajo. Van a jugar el reto que elegiste al invitar.</p>
+        <ion-button expand="block" color="secondary" (click)="hostStartGame()">
+          <ion-icon slot="start" name="play-circle-outline"></ion-icon>
+          Empezar a jugar
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="session.status === 'waiting' && isGuest">
+      <ion-card-content>
+        <p>Esperá a que quien invitó pulse <strong>Empezar a jugar</strong>.</p>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="session.status === 'in-progress' && session.startedGame" color="light">
+      <ion-card-content>
+        <p><strong>¡Dale!</strong></p>
+        <p class="room-progress" *ngIf="totalMembers > 0">
+          {{ finishedPlayingCount }} de {{ totalMembers }} ya terminaron esta ronda.
+        </p>
+        <ion-button expand="block" color="primary" (click)="enterGameFromLobby()">Entrar al juego</ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="isHost" color="danger" class="close-room-card">
+      <ion-card-content>
+        <ion-button expand="block" fill="outline" color="light" (click)="confirmCloseRoom()">
+          <ion-icon slot="start" name="close-circle-outline"></ion-icon>
+          Terminar partida Bluetooth
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </ng-container>
+
+  <ion-button expand="block" fill="clear" (click)="goLobby()">Volver al lobby</ion-button>
+</ion-content>

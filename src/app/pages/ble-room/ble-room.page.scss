@@ -1,0 +1,13 @@
+@import '../bt-room/bt-room.page.scss';
+
+.ble-room-note {
+  font-size: 0.88rem;
+  color: #555;
+  margin: 0 0 16px;
+  line-height: 1.4;
+}
+
+.waiting-guest {
+  color: var(--ion-color-primary-shade, #3a5bc7);
+  font-weight: 600;
+}
