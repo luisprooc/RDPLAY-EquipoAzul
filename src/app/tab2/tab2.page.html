@@ -62,23 +62,43 @@
     </div>
 
     <div class="nearby-head ble-head">
-      <h3>Cerca con Bluetooth</h3>
-      <span class="live" *ngIf="bleDevices.length">{{ bleDevices.length }} encontrados</span>
+      <h3>Bluetooth cercano</h3>
+      <span class="live" *ngIf="bleDevices.length">{{ bleDevices.length }} cerca</span>
     </div>
+    <p class="ble-section-lede">
+      Si ves el celu de tu pana en la lista, tocá y elegí el juego: le vas a dar un código para que se una. No usa
+      las salas de internet, solo ustedes dos.
+    </p>
+    <ion-button
+      class="ble-join-btn"
+      expand="block"
+      fill="outline"
+      color="primary"
+      shape="round"
+      (click)="openBleJoin()"
+    >
+      <ion-icon name="keypad-outline" slot="start" aria-hidden="true"></ion-icon>
+      Unirte por Bluetooth (código)
+    </ion-button>
     <p class="ble-hint" *ngIf="bleStatusMessage">{{ bleStatusMessage }}</p>
     <ion-card class="player-card ble-device-card" *ngFor="let d of bleDevices">
       <ion-item lines="none" button detail="false" (click)="onBleDeviceTap(d)">
         <ion-icon name="bluetooth" slot="start" color="primary" aria-hidden="true"></ion-icon>
         <ion-label>
           <h2>{{ d.name }}</h2>
-          <p>Tocá acá para ver cómo invitarlos a tu partida.</p>
+          <p>Tocá para invitarlo a una partida solo entre ustedes (elegís trivia, memoria o secuencia).</p>
         </ion-label>
       </ion-item>
     </ion-card>
     <div class="hint-card" *ngIf="!bleDevices.length && !bleStatusMessage">
       <ion-icon name="bluetooth-outline" aria-hidden="true"></ion-icon>
-      <p>Buscando aparatos cerca… Asegurate de tener el Bluetooth prendido y el otro teléfono también.</p>
+      <p>Buscando aparatos cerca… Ambos con Bluetooth encendido y la app abierta en esta pantalla ayuda.</p>
     </div>
+
+    <ion-button expand="block" fill="clear" color="secondary" routerLink="/tabs/tab3" class="ion-margin-top">
+      <ion-icon name="trophy" slot="start" aria-hidden="true"></ion-icon>
+      Ir a Retos
+    </ion-button>
 
     <div class="nearby-head">
       <h3>Jugadores conectados</h3>

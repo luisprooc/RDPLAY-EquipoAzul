@@ -23,14 +23,14 @@ de la app: entretenimiento dominicano accesible para todos.
 
 `minSdkVersion` está en **26** (Android 8.0). Necesitas **JDK 17+** (Android Studio lo incluye).
 
-**APK debug con nombre `hito2-app-debug.apk` (raíz del repo):**
+**APK debug con nombre `hito3-app-debug.apk` (raíz del repo):**
 
 ```bash
 npm install
 npm run apk:debug
 ```
 
-El script compila la web, sincroniza Capacitor, ejecuta `./gradlew assembleDebug` y copia el APK a `./hito2-app-debug.apk`.
+El script compila la web, sincroniza Capacitor, ejecuta `./gradlew assembleDebug` y copia el APK a `./hito3-app-debug.apk`.
 
 Alternativa manual: `npm run build`, `npx cap sync android`, abrir `android/` en Android Studio → Build → Build APK(s).
 

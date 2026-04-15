@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { StorageService } from '../core/storage.service';
 import { STORAGE_KEYS } from '../core/storage.keys';
 import { UserProfileService } from '../core/user-profile.service';
+import { RankingService } from '../core/ranking.service';
 
 @Component({
   selector: 'app-tab4',
@@ -16,6 +17,7 @@ export class Tab4Page {
   constructor(
     private readonly storage: StorageService,
     private readonly userProfile: UserProfileService,
+    private readonly ranking: RankingService,
   ) {}
 
   async ionViewWillEnter(): Promise<void> {
@@ -32,5 +34,6 @@ export class Tab4Page {
     }
     await this.userProfile.setDisplayName(trimmed);
     this.displayName = this.userProfile.getDisplayName();
+    void this.ranking.syncMyEntry();
   }
 }

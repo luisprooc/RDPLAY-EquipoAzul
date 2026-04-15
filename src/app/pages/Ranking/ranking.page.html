@@ -1,51 +1,65 @@
 <ion-header>
   <ion-toolbar color="primary">
-    <ion-title>🏆 Ranking RDPlay</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/tab3" text="Retos"></ion-back-button>
+    </ion-buttons>
+    <ion-title>🏆 Ranking</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="load()">
-        <ion-icon name="refresh-outline"></ion-icon>
+      <ion-button (click)="load()" aria-label="Actualizar lista">
+        <ion-icon name="refresh-outline" aria-hidden="true"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
+  <p class="ranking-lede">
+    Mirá quién va encabezando la lista con los puntos que ha ido sumando en trivia, memoria y secuencia (todo cuenta
+    para el mismo total). Para cambiar cómo te mostramos, abrí <strong>Perfil</strong>.
+  </p>
 
-  <!-- Filtro por juego -->
-  <ion-segment [value]="selectedGame" (ionChange)="onGameChange($event)" scrollable>
-    <ion-segment-button *ngFor="let g of games" [value]="g.value">
-      <ion-label>{{ g.label }}</ion-label>
-    </ion-segment-button>
-  </ion-segment>
+  <ion-button
+    class="go-retos-btn"
+    expand="block"
+    routerLink="/tabs/tab3"
+    color="secondary"
+    shape="round"
+  >
+    <ion-icon name="trophy" slot="start" aria-hidden="true"></ion-icon>
+    Ir a Retos
+  </ion-button>
 
-  <!-- Loading -->
+  <ion-card class="my-card" *ngIf="myTotalPoints >= 0">
+    <ion-card-content>
+      <p class="my-label">Así vas vos</p>
+      <p class="my-name">{{ myDisplayName }}</p>
+      <p class="my-points">{{ myTotalPoints | number }} puntos</p>
+    </ion-card-content>
+  </ion-card>
+
   <div *ngIf="isLoading" class="ion-text-center ion-padding">
     <ion-spinner name="crescent" color="primary"></ion-spinner>
-    <p>Cargando ranking...</p>
+    <p>Un momento…</p>
   </div>
 
-  <!-- Sin resultados -->
-  <div *ngIf="!isLoading && scores.length === 0" class="ion-text-center ion-padding">
+  <div *ngIf="!isLoading && entries.length === 0" class="ion-text-center ion-padding">
     <ion-icon name="trophy-outline" size="large" color="medium"></ion-icon>
-    <p>Aún no hay puntajes registrados.</p>
-    <p>¡Sé el primero en jugar!</p>
+    <p>Todavía no hay nadie en la lista, o no pudimos conectarnos.</p>
+    <p>Jugá una partida y tocá el botón de arriba para actualizar.</p>
   </div>
 
-  <!-- Lista de puntajes -->
-  <ion-list *ngIf="!isLoading && scores.length > 0" lines="full">
-    <ion-item *ngFor="let entry of scores; let i = index"
-              [color]="i === 0 ? 'warning' : ''">
+  <ion-list *ngIf="!isLoading && entries.length > 0" lines="full">
+    <ion-item *ngFor="let entry of entries; let i = index" [color]="i === 0 ? 'warning' : ''">
       <ion-avatar slot="start">
         <div class="medal">{{ getMedal(i) }}</div>
       </ion-avatar>
       <ion-label>
-        <h2>{{ entry.playerName }}</h2>
-        <p>{{ entry.game | titlecase }} · {{ entry.createdAt?.toDate() | date:'dd/MM/yyyy' }}</p>
+        <h2>{{ entry.displayName }}</h2>
+        <p class="entry-sub" *ngIf="updatedLabel(entry)">{{ updatedLabel(entry) }}</p>
       </ion-label>
       <ion-note slot="end" color="primary">
-        <strong>{{ entry.score }} pts</strong>
+        <strong>{{ entry.totalPoints | number }} puntos</strong>
       </ion-note>
     </ion-item>
   </ion-list>
-
 </ion-content>

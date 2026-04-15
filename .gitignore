@@ -56,8 +56,15 @@ yarn-error.log
 # Secrets (Firebase y similares)
 .env
 
+# Firma release Android (no subir a git)
+android/keystore.properties
+android/app/release.keystore
+android/app/*.jks
+android/app/*.p12
+
 # Doc generation (python-docx local install)
 /.docx-deps
+/.venv-docx
 
 # Miscellaneous
 /.angular

@@ -3,7 +3,10 @@ import { Router } from '@angular/router';
 import { ActionSheetController, AlertController, ToastController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { BtLeService, BleDeviceDisplay } from '../core/bt-le.service';
+import { BleSessionService } from '../core/ble-session.service';
 import { LobbyPlayer, LobbyRoom, LobbyService } from '../core/lobby.service';
+import { StorageService } from '../core/storage.service';
+import { STORAGE_KEYS } from '../core/storage.keys';
 
 @Component({
   selector: 'app-tab2',
@@ -22,6 +25,8 @@ export class Tab2Page implements OnDestroy {
 
   constructor(
     private lobby: LobbyService,
+    private bleSession: BleSessionService,
+    private storage: StorageService,
     private btLe: BtLeService,
     private actionSheet: ActionSheetController,
     private alertCtrl: AlertController,
@@ -178,11 +183,68 @@ export class Tab2Page implements OnDestroy {
     return code;
   }
 
+  /**
+   * Toca un aparato BLE cercano: invitás a jugar por partida Bluetooth (sala aparte del lobby online).
+   * Elegís el reto; tu amigo debe ingresar el código en “Unirte por Bluetooth”.
+   */
   async onBleDeviceTap(device: BleDeviceDisplay): Promise<void> {
-    await this.showToast(
-      `Para jugar con ${device.name}, creá una sala y pasales el código por WhatsApp o de viva voz.`,
-      'medium',
-    );
+    const sheet = await this.actionSheet.create({
+      header: `Invitar a ${device.name}`,
+      buttons: [
+        { text: 'Trivia Quiz', icon: 'help-circle', data: 'quiz' as const },
+        { text: 'Memoria', icon: 'grid', data: 'memory' as const },
+        { text: 'Secuencia', icon: 'list', data: 'sequence' as const },
+        { text: 'Cancelar', role: 'cancel' },
+      ],
+    });
+    await sheet.present();
+    const { data: game } = await sheet.onDidDismiss<'quiz' | 'memory' | 'sequence'>();
+    if (!game) {
+      return;
+    }
+    try {
+      await this.lobby.registerPlayer();
+      const hostId = this.lobby.currentPlayerId;
+      if (!hostId) {
+        await this.showToast('No pudimos identificarte. Probá de nuevo.', 'danger');
+        return;
+      }
+      const hostName =
+        (await this.storage.get(STORAGE_KEYS.DISPLAY_NAME))?.trim() || 'Anfitrión';
+      const sessionId = await this.bleSession.createSession(game, hostId, hostName);
+      await this.showToast('Decile el código a tu amigo o mostrá la pantalla siguiente.');
+      await this.router.navigate(['/ble-room', sessionId]);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'No se pudo crear la partida';
+      await this.showToast(msg, 'danger');
+    }
+  }
+
+  /** Invitado: ingresa el código de 6 dígitos que le dictó quien invitó. */
+  async openBleJoin(): Promise<void> {
+    const code = await this.promptRoomCode({
+      header: 'Unirte por Bluetooth',
+      message:
+        'Pedile el código de 6 números a quien te invitó. Tiene que estar en la misma pantalla de partida Bluetooth.',
+      confirmText: 'Unirme',
+    });
+    if (!code) {
+      return;
+    }
+    try {
+      await this.lobby.registerPlayer();
+      const guestId = this.lobby.currentPlayerId;
+      if (!guestId) {
+        await this.showToast('No pudimos identificarte.', 'danger');
+        return;
+      }
+      const guestName = (await this.storage.get(STORAGE_KEYS.DISPLAY_NAME))?.trim() || 'Jugador';
+      const sessionId = await this.bleSession.joinSessionByInviteCode(code, guestId, guestName);
+      await this.router.navigate(['/ble-room', sessionId]);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'No se pudo unir';
+      await this.showToast(msg, 'danger');
+    }
   }
 
   async onRefresh(ev: CustomEvent): Promise<void> {

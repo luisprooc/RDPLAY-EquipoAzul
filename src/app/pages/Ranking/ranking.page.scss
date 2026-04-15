@@ -1,1 +1,48 @@
+.ranking-lede {
+  font-size: 0.95rem;
+  color: var(--ion-color-medium-shade, #666);
+  margin: 0 0 12px;
+  line-height: 1.45;
+}
 
+.go-retos-btn {
+  margin: 0 0 20px;
+  font-weight: 600;
+}
+
+.my-card {
+  margin-bottom: 16px;
+  border-radius: 12px;
+}
+
+.my-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ion-color-medium-shade, #666);
+  margin: 0 0 8px;
+}
+
+.my-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.my-points {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--ion-color-primary);
+  margin: 0;
+}
+
+.medal {
+  font-size: 1.25rem;
+  text-align: center;
+  line-height: 40px;
+}
+
+.entry-sub {
+  font-size: 0.82rem;
+  color: var(--ion-color-medium);
+  margin-top: 4px;
+}

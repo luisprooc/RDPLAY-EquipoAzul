@@ -12,7 +12,10 @@
     "lint": "ng lint",
     "android:sync": "npm run build && npx cap sync android",
     "android:open": "npx cap open android",
-    "apk:debug": "bash scripts/build-debug-apk.sh"
+    "apk:debug": "bash scripts/build-debug-apk.sh",
+    "apk:release": "bash scripts/build-release-apk.sh",
+    "android:setup-release-signing": "bash scripts/setup-release-keystore.sh",
+    "docs:hito4": "bash -c 'test -x .venv-docx/bin/python || (python3 -m venv .venv-docx && .venv-docx/bin/pip install -q python-docx); .venv-docx/bin/python scripts/generate-hito4-docx.py'"
   },
   "private": true,
   "dependencies": {

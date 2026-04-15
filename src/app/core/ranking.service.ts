@@ -1,39 +1,99 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collection, addDoc, query, orderBy, limit, getDocs, serverTimestamp } from '@angular/fire/firestore';
+import {
+  Firestore,
+  collection,
+  doc,
+  setDoc,
+  query,
+  orderBy,
+  limit,
+  getDocs,
+  serverTimestamp,
+} from '@angular/fire/firestore';
+import { StorageService } from './storage.service';
+import { STORAGE_KEYS } from './storage.keys';
 
-export interface RankingEntry {
-  id?: string;
-  playerName: string;
-  score: number;
-  game: string; // 'quiz' | 'memory' | 'sequence'
-  createdAt?: any;
+/** Una fila del tablero global (puntos totales del usuario en este dispositivo). */
+export interface LeaderboardEntry {
+  id: string;
+  displayName: string;
+  totalPoints: number;
+  updatedAt?: unknown;
+}
+
+function generatePublicId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
 }
 
 @Injectable({ providedIn: 'root' })
 export class RankingService {
+  constructor(
+    private firestore: Firestore,
+    private storage: StorageService,
+  ) {}
 
-  constructor(private firestore: Firestore) {}
+  private async getOrCreatePublicId(): Promise<string | null> {
+    let id = await this.storage.get(STORAGE_KEYS.LEADERBOARD_PUBLIC_ID);
+    if (!id?.trim()) {
+      id = generatePublicId();
+      await this.storage.set(STORAGE_KEYS.LEADERBOARD_PUBLIC_ID, id);
+    }
+    return id;
+  }
 
-  /** Guarda un puntaje en Firestore */
-  async saveScore(entry: Omit<RankingEntry, 'id' | 'createdAt'>): Promise<void> {
+  /**
+   * Sube el total local de puntos y el nombre visible al ranking global.
+   * Sin efecto si Firebase no está disponible.
+   */
+  async syncMyEntry(): Promise<void> {
     try {
-      const col = collection(this.firestore, 'rankings');
-      await addDoc(col, { ...entry, createdAt: serverTimestamp() });
-    } catch (err) {
-      // Si no hay internet, el SDK de Firebase guarda en caché local
-      console.warn('Puntaje guardado en caché local (sin conexión)', err);
+      const pid = await this.getOrCreatePublicId();
+      if (!pid) {
+        return;
+      }
+      const nameRaw = await this.storage.get(STORAGE_KEYS.DISPLAY_NAME);
+      const displayName = nameRaw?.trim() || 'Jugador';
+      const raw = await this.storage.get(STORAGE_KEYS.TOTAL_POINTS);
+      const totalPoints = raw != null ? Number.parseInt(raw, 10) || 0 : 0;
+      await setDoc(
+        doc(this.firestore, 'leaderboard', pid),
+        {
+          displayName,
+          totalPoints,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true },
+      );
+    } catch {
+      /* sin Firebase o sin red */
     }
   }
 
-  /** Obtiene el top 10 global ordenado por puntaje */
-  async getTopScores(game?: string): Promise<RankingEntry[]> {
+  /** Top mundial por puntos totales acumulados en la app. */
+  async getGlobalLeaderboard(maxEntries = 50): Promise<LeaderboardEntry[]> {
     try {
-      const col = collection(this.firestore, 'rankings');
-      const q = query(col, orderBy('score', 'desc'), limit(10));
+      const q = query(
+        collection(this.firestore, 'leaderboard'),
+        orderBy('totalPoints', 'desc'),
+        limit(maxEntries),
+      );
       const snap = await getDocs(q);
-      return snap.docs
-        .map(d => ({ id: d.id, ...d.data() } as RankingEntry))
-        .filter(e => !game || e.game === game);
+      return snap.docs.map((d) => {
+        const data = d.data() as { displayName?: string; totalPoints?: number; updatedAt?: unknown };
+        return {
+          id: d.id,
+          displayName: data.displayName ?? 'Jugador',
+          totalPoints: typeof data.totalPoints === 'number' ? data.totalPoints : 0,
+          updatedAt: data.updatedAt,
+        };
+      });
     } catch {
       return [];
     }
